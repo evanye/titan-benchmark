@@ -76,6 +76,7 @@ public class Graph {
 
     public void warmup() {
         restartTransaction();
+        long c = 0L;
         for (Vertex v: txn.getVertices()) {
             v.getId();
             for (String key: v.getPropertyKeys()) {
@@ -84,8 +85,12 @@ public class Graph {
             for (Edge e: v.getEdges(Direction.OUT)) {
                 e.getVertex(Direction.IN);
             }
+            if (++c % 10000 == 0)
+                System.out.println("processed " + c + " nodes");
         }
 
+        restartTransaction();
+        c = 0L;
         for (Edge e: txn.getEdges()) {
             e.getId();
             e.getLabel();
@@ -93,6 +98,8 @@ public class Graph {
             for (String key: e.getPropertyKeys()) {
                 Object prop = e.getProperty(key);
             }
+            if (++c % 10000 == 0)
+                System.out.println("processed " + c + " edges");
         }
         restartTransaction();
     }
