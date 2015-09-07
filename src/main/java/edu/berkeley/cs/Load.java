@@ -2,11 +2,10 @@ package edu.berkeley.cs;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.thinkaurelius.titan.core.PropertyKey;
-import com.thinkaurelius.titan.core.TitanFactory;
-import com.thinkaurelius.titan.core.TitanGraph;
+import com.thinkaurelius.titan.core.*;
 import com.thinkaurelius.titan.core.schema.TitanManagement;
 import com.thinkaurelius.titan.core.util.TitanId;
+import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.util.wrappers.batch.BatchGraph;
@@ -22,13 +21,14 @@ import java.util.List;
 public class Load {
 
     public static void main(String[] args) throws ConfigurationException, IOException {
+        final Configuration config = new PropertiesConfiguration(Load.class.getResource("/benchmark.properties"));
+
         URL props = Load.class.getResource("/titan-cassandra.properties");
         Configuration titanConfiguration = new PropertiesConfiguration(props) {{
             setProperty("storage.batch-loading", true);
             setProperty("schema.default", "none");
             setProperty("graph.set-vertex-id", true);
         }};
-        Configuration config = new PropertiesConfiguration(Load.class.getResource("/benchmark.properties"));
 
         TitanGraph g = TitanFactory.open(titanConfiguration);
         createSchemaIfNotExists(g, config);
@@ -53,7 +53,8 @@ public class Load {
         PropertyKey timestamp = mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
         PropertyKey edgeProperty = mgmt.makePropertyKey("property").dataType(String.class).make();
         for (int i = 0; i < NUM_ATYPES; i++) {
-            mgmt.makeEdgeLabel(""+ i).signature(timestamp, edgeProperty).unidirected().make();
+            EdgeLabel label = mgmt.makeEdgeLabel(""+ i).signature(timestamp, edgeProperty).unidirected().make();
+            mgmt.buildEdgeIndex(label, "byEdge"+i, Direction.OUT, Order.DESC, timestamp);
         }
 
         mgmt.commit();
