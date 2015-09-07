@@ -39,7 +39,7 @@ public class Graph {
 
     public List<Long> getNeighbors(long id) {
         List<Long> neighbors = new LinkedList<>();
-        TitanVertex node = txn.getVertex(TitanId.fromVertexId(id));
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             neighbors.add(TitanId.fromVertexID(edge.getOtherVertex(node)));
         }
@@ -64,7 +64,7 @@ public class Graph {
 
     public List<Long> getNeighborNode(long id, int propIdx, String search) {
         List<Long> result = new LinkedList<>();
-        TitanVertex node = txn.getVertex(TitanId.fromVertexId(id));
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             TitanVertex neighbor = edge.getOtherVertex(node);
             if (search.equals(neighbor.getProperty("attr" + propIdx))) {

@@ -31,7 +31,7 @@ public class BenchNeighbor {
 
     static void benchNeighborLatency(Graph g, PrintWriter out, List<Long> warmupQueries, List<Long> queries) {
         System.out.println("Titan getNeighbor query latency");
-        BenchUtils.fullWarmup(g);
+        //fullWarmup(g);
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
