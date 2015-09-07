@@ -5,9 +5,9 @@ import edu.berkeley.cs.Graph;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import static edu.berkeley.cs.benchmark.BenchUtils.getNodeQueries;
-import static edu.berkeley.cs.benchmark.BenchUtils.makeFileWriter;
+import static edu.berkeley.cs.benchmark.BenchUtils.*;
 
 public class BenchNode {
     private static int WARMUP_N = 100000;
@@ -51,6 +51,32 @@ public class BenchNode {
         }
     }
 
-    private static void nodeLatency(Graph g, PrintWriter out, List<Integer> warmupAttributes, List<String> warmupQueries, List<Integer> attributes, List<String> queries) {
+    private static void nodeLatency(Graph g, PrintWriter out, List<Integer> warmupAttributes, List<String> warmupQueries,
+                                    List<Integer> attributes, List<String> queries) {
+        System.out.println("Titan getNode query latency");
+        BenchUtils.fullWarmup(g);
+        System.out.println("Warming up for " + WARMUP_N + " queries");
+        for (int i = 0; i < WARMUP_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+            Set<Long> nodes = g.getNodes(modGet(warmupAttributes, i), modGet(warmupQueries, i));
+        }
+
+        System.out.println("Measuring for " + MEASURE_N + " queries");
+        for (int i = 0; i < MEASURE_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Measured for " + i + " queries");
+            }
+            long start = System.nanoTime();
+            Set<Long> nodes = g.getNodes(modGet(attributes, i), modGet(queries, i));
+            long end = System.nanoTime();
+            double microsecs = (end - start) / ((double) 1000);
+            out.println(nodes.size() + "," + microsecs);
+        }
+        out.close();
+        printMemoryFootprint();
     }
 }
