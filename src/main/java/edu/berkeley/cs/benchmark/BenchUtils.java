@@ -1,9 +1,8 @@
 package edu.berkeley.cs.benchmark;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
+import edu.berkeley.cs.Graph;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,6 +22,15 @@ public class BenchUtils {
         out.println();
     }
 
+    public static void fullWarmup(Graph g) {
+        System.out.println("Warming up graph");
+        long start = System.nanoTime();
+        g.warmup();
+        long end = System.nanoTime();
+        printMemoryFootprint();
+        System.out.println("Full warmup done in " + (end - start) / 1e6 + " millis");
+    }
+
     public static void printMemoryFootprint() {
         Runtime rt = Runtime.getRuntime();
         long max = rt.maxMemory();
@@ -34,6 +42,15 @@ public class BenchUtils {
                 (allocated - rt.freeMemory()) * 1. / (1L << 30));
     }
 
+    public static void getNodeQueries(
+            String queryPath, List<Integer> warmupAttr1, List<Integer> warmupAttr2,
+            List<String> warmupQuery1, List<String> warmupQuery2,
+            List<Integer> attr1, List<Integer> attr2,
+            List<String> query1, List<String> query2) {
+
+        getNodeQueries(queryPath + "/node_warmup_100000.txt", warmupAttr1, warmupAttr2, warmupQuery1, warmupQuery2);
+        getNodeQueries(queryPath + "/node_query_100000.txt", attr1, attr2, query1, query2);
+    }
     public static void getNodeQueries(
             String file, List<Integer> indices1, List<Integer> indices2,
             List<String> queries1, List<String> queries2) {
@@ -52,6 +69,11 @@ public class BenchUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void getNeighborQueries(String queryPath, List<Long> warmupNeighbors, List<Long> neighbors) {
+        getNeighborQueries(queryPath + "/neighbor_warmup_100000.txt", warmupNeighbors);
+        getNeighborQueries(queryPath + "/neighbor_query_100000.txt", neighbors);
     }
 
     public static void getNeighborQueries(String file, List<Long> nhbrs) {
@@ -202,4 +224,12 @@ public class BenchUtils {
         }
     }
 
+    public static PrintWriter makeFileWriter(String output_file) {
+        try {
+            return new PrintWriter(new BufferedWriter(new FileWriter(output_file)));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

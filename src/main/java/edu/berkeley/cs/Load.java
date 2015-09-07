@@ -64,8 +64,11 @@ public class Load {
         BatchGraph bg = new BatchGraph(g, VertexIDType.NUMBER, 10000);
 
         int propertySize = conf.getInt("property.size");
+        String nodeFile = conf.getString("data.node");
+        String edgeFile = conf.getString("data.edge");
+        System.out.printf("nodeFile %s, edgeFile %s, propertySize %d", nodeFile, edgeFile, propertySize);
         long c = 1L;
-        try (BufferedReader br = new BufferedReader(new FileReader(conf.getString("data.node")))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(nodeFile))) {
             for (String line; (line = br.readLine()) != null; ) {
                 Vertex node = bg.addVertex(TitanId.toVertexId(c));
                 int i = 0;
@@ -81,7 +84,7 @@ public class Load {
         }
 
         c = 1L;
-        try (BufferedReader br = new BufferedReader(new FileReader(conf.getString("data.edge")))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(edgeFile))) {
             for (String line; (line = br.readLine()) != null; ) {
                 List<String> tokens = Lists.newArrayList(Splitter.on(' ').limit(5).trimResults().split(line));
                 Long id1 = Long.parseLong(tokens.get(0));

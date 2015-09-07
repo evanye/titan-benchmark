@@ -1,9 +1,9 @@
 package edu.berkeley.cs;
 
 import com.thinkaurelius.titan.core.*;
-import com.thinkaurelius.titan.core.schema.TitanGraphIndex;
 import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
+import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -29,16 +29,12 @@ public class Graph {
         }
 
         g = TitanFactory.open(titanConfiguration);
-        txn = null;
-    }
-
-    public void startTransaction() {
         txn = g.buildTransaction().readOnly().start();
     }
 
-    public void stopTransaction() {
+    public void restartTransaction() {
         txn.commit();
-        txn = null;
+        txn = g.buildTransaction().readOnly().start();
     }
 
     public List<Long> getNeighbors(long id) {
@@ -76,6 +72,29 @@ public class Graph {
             }
         }
         return result;
+    }
+
+    public void warmup() {
+        restartTransaction();
+        for (Vertex v: txn.getVertices()) {
+            v.getId();
+            for (String key: v.getPropertyKeys()) {
+                Object prop = v.getProperty(key);
+            }
+            for (Edge e: v.getEdges(Direction.OUT)) {
+                e.getVertex(Direction.IN);
+            }
+        }
+
+        for (Edge e: txn.getEdges()) {
+            e.getId();
+            e.getLabel();
+            e.getVertex(Direction.IN); e.getVertex(Direction.OUT);
+            for (String key: e.getPropertyKeys()) {
+                Object prop = e.getProperty(key);
+            }
+        }
+        restartTransaction();
     }
 
     public void shutdown() {

@@ -1,7 +1,12 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.Graph;
+
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static edu.berkeley.cs.benchmark.BenchUtils.*;
 
 public class BenchNeighbor {
     private static int WARMUP_N;
@@ -10,20 +15,45 @@ public class BenchNeighbor {
     public static void main(String[] args) {
         String type = args[0];
         String db_path = args[1];
-        String warmup_query_path = args[2];
-        String query_path = args[3];
-        String output_file = args[4];
-        WARMUP_N = Integer.parseInt(args[5]);
-        MEASURE_N = Integer.parseInt(args[6]);
+        String output_file = args[2];
+        WARMUP_N = Integer.parseInt(args[3]);
+        MEASURE_N = Integer.parseInt(args[4]);
+        String query_path = args[5];
 
-        List<Long> warmupQueries = new ArrayList<>();
+        Graph g = new Graph();
+        List<Long> warmup_queries = new ArrayList<>();
         List<Long> queries = new ArrayList<>();
-        BenchUtils.getNeighborQueries(warmup_query_path, warmupQueries);
-        BenchUtils.getNeighborQueries(query_path, queries);
+        getNeighborQueries(query_path, warmup_queries, queries);
+        PrintWriter out = makeFileWriter(output_file);
 
-        benchNeighborLatency(db_path, warmupQueries, queries, output_file);
+        benchNeighborLatency(g, out, warmup_queries, queries);
     }
 
-    static void benchNeighborLatency(String db_path, List<Long> warmupQueries, List<Long> queries, String output_file) {
+    static void benchNeighborLatency(Graph g, PrintWriter out, List<Long> warmupQueries, List<Long> queries) {
+        System.out.println("Titan getNeighbor query latency");
+        BenchUtils.fullWarmup(g);
+        System.out.println("Warming up for " + WARMUP_N + " queries");
+        for (int i = 0; i < WARMUP_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+            List<Long> neighbors = g.getNeighbors(modGet(warmupQueries, i));
+        }
+
+        System.out.println("Measuring for " + MEASURE_N + " queries");
+        for (int i = 0; i < MEASURE_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Measured for " + i + " queries");
+            }
+            long start = System.nanoTime();
+            List<Long> neighbors = g.getNeighbors(modGet(warmupQueries, i));
+            long end = System.nanoTime();
+            double microsecs = (end - start) / ((double) 1000);
+            out.println(neighbors.size() + "," + microsecs);
+        }
+        out.close();
+        printMemoryFootprint();
     }
 }
