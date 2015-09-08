@@ -16,6 +16,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 
 import java.io.*;
 import java.net.URL;
+import java.util.Iterator;
 import java.util.List;
 
 public class Load {
@@ -64,18 +65,21 @@ public class Load {
         BatchGraph bg = new BatchGraph(g, VertexIDType.NUMBER, 10000);
 
         int propertySize = conf.getInt("property.size");
+        int numProperty = conf.getInt("property.total");
         String nodeFile = conf.getString("data.node");
         String edgeFile = conf.getString("data.edge");
         System.out.printf("nodeFile %s, edgeFile %s, propertySize %d", nodeFile, edgeFile, propertySize);
+
         long c = 1L;
         try (BufferedReader br = new BufferedReader(new FileReader(nodeFile))) {
             for (String line; (line = br.readLine()) != null; ) {
+                // Node file has funky carriage return ^M, so we read one more line to finish the node information
+                line += '\02' + br.readLine(); // replace carriage return with dummy line
                 Vertex node = bg.addVertex(TitanId.toVertexId(c));
-                int i = 0;
-                for (String attr: Splitter.fixedLength(propertySize + 1).split(line)) {
-                    attr = attr.substring(1); // trim first delimiter character
+                Iterator<String> tokens = Splitter.fixedLength(propertySize + 1).split(line).iterator();
+                for (int i = 0; i < numProperty; i++) {
+                    String attr = tokens.next().substring(1); // trim first delimiter character
                     node.setProperty("attr" + i, attr);
-                    i++;
                 }
                 if (++c%100000L == 0L) {
                     System.out.println("Processed " + c + " nodes");
