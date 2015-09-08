@@ -111,6 +111,16 @@ public class BenchUtils {
     }
 
     public static void getNeighborNodeQueries(
+            String query_path, List<Long> warmup_neighbor_indices, List<Long> neighbor_indices,
+            List<Integer> warmup_node_attributes, List<Integer> node_attributes,
+            List<String> warmup_node_queries, List<String> node_queries) {
+        getNeighborNodeQueries(query_path + "/neighbor_node_warmup_100000.txt",
+                warmup_neighbor_indices, warmup_node_attributes, warmup_node_queries);
+        getNeighborNodeQueries(query_path + "/neighbor_node_query_100000.txt",
+                neighbor_indices, node_attributes, node_queries);
+    }
+
+    public static void getNeighborNodeQueries(
             String file, List<Long> indices,
             List<Integer> attributes, List<String> queries) {
 

@@ -20,10 +20,14 @@ public class Graph {
     private TitanTransaction txn;
 
     public Graph() {
+        URL confURL = getClass().getResource("/benchmark.properties");
         URL props = getClass().getResource("/titan-cassandra.properties");
         Configuration titanConfiguration = null;
         try {
-            titanConfiguration = new PropertiesConfiguration(props);
+            final Configuration config = new PropertiesConfiguration(confURL);
+            titanConfiguration = new PropertiesConfiguration(props) {{
+                setProperty("storage.cassandra.keyspace", config.getString("name"));
+            }};
         } catch (ConfigurationException e) {
             e.printStackTrace();
         }

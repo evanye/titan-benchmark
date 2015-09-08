@@ -14,11 +14,10 @@ public class BenchNeighbor {
 
     public static void main(String[] args) {
         String type = args[0];
-        String db_path = args[1];
+        String query_path = args[1];
         String output_file = args[2];
         WARMUP_N = Integer.parseInt(args[3]);
         MEASURE_N = Integer.parseInt(args[4]);
-        String query_path = args[5];
 
         Graph g = new Graph();
         List<Long> warmup_queries = new ArrayList<>();
@@ -26,7 +25,11 @@ public class BenchNeighbor {
         getNeighborQueries(query_path, warmup_queries, queries);
         PrintWriter out = makeFileWriter(output_file);
 
-        benchNeighborLatency(g, out, warmup_queries, queries);
+        if ("latency".equals(type)) {
+            benchNeighborLatency(g, out, warmup_queries, queries);
+        } else {
+            System.err.println("Type " + type + " not supported!");
+        }
     }
 
     static void benchNeighborLatency(Graph g, PrintWriter out, List<Long> warmupQueries, List<Long> queries) {

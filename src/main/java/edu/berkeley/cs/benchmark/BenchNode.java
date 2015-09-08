@@ -10,16 +10,15 @@ import java.util.Set;
 import static edu.berkeley.cs.benchmark.BenchUtils.*;
 
 public class BenchNode {
-    private static int WARMUP_N = 100000;
-    private static int MEASURE_N = 100000;
+    private static int WARMUP_N;
+    private static int MEASURE_N;
 
     public static void main(String[] args) {
         String type = args[0];
-        String db_path = args[1];
+        String query_path = args[1];
         String output_file = args[2];
         WARMUP_N = Integer.parseInt(args[3]);
         MEASURE_N = Integer.parseInt(args[4]);
-        String query_path = args[5];
 
         Graph g = new Graph();
         List<Integer> warmupAttributes1 = new ArrayList<Integer>();
@@ -54,7 +53,7 @@ public class BenchNode {
     private static void nodeLatency(Graph g, PrintWriter out, List<Integer> warmupAttributes, List<String> warmupQueries,
                                     List<Integer> attributes, List<String> queries) {
         System.out.println("Titan getNode query latency");
-        BenchUtils.fullWarmup(g);
+//        BenchUtils.fullWarmup(g);
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
@@ -72,6 +71,39 @@ public class BenchNode {
             }
             long start = System.nanoTime();
             Set<Long> nodes = g.getNodes(modGet(attributes, i), modGet(queries, i));
+            long end = System.nanoTime();
+            double microsecs = (end - start) / ((double) 1000);
+            out.println(nodes.size() + "," + microsecs);
+        }
+        out.close();
+        printMemoryFootprint();
+    }
+
+    private static void nodeNodeLatency(Graph g, PrintWriter out, List<Integer> warmupAttributes1, List<Integer> warmupAttributes2,
+                                        List<String> warmupQueries1, List<String> warmupQueries2,
+                                        List<Integer> attributes1, List<Integer> attributes2,
+                                        List<String> queries1, List<String> queries2) {
+        System.out.println("Titan getNodeNode query latency");
+//        BenchUtils.fullWarmup(g);
+        System.out.println("Warming up for " + WARMUP_N + " queries");
+        for (int i = 0; i < WARMUP_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+            Set<Long> nodes = g.getNodes(modGet(warmupAttributes1, i), modGet(warmupQueries1, i),
+                    modGet(warmupAttributes2, i), modGet(warmupQueries2, i));
+        }
+
+        System.out.println("Measuring for " + MEASURE_N + " queries");
+        for (int i = 0; i < MEASURE_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Measured for " + i + " queries");
+            }
+            long start = System.nanoTime();
+            Set<Long> nodes = g.getNodes(modGet(attributes1, i), modGet(queries1, i),
+                    modGet(attributes2, i), modGet(queries2, i));
             long end = System.nanoTime();
             double microsecs = (end - start) / ((double) 1000);
             out.println(nodes.size() + "," + microsecs);

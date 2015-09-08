@@ -29,6 +29,7 @@ public class Load {
             setProperty("storage.batch-loading", true);
             setProperty("schema.default", "none");
             setProperty("graph.set-vertex-id", true);
+            setProperty("storage.cassandra.keyspace", config.getString("name"));
         }};
 
         TitanGraph g = TitanFactory.open(titanConfiguration);
