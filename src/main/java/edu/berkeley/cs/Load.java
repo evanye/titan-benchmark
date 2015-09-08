@@ -55,7 +55,7 @@ public class Load {
         PropertyKey edgeProperty = mgmt.makePropertyKey("property").dataType(String.class).make();
         for (int i = 0; i < NUM_ATYPES; i++) {
             EdgeLabel label = mgmt.makeEdgeLabel(""+ i).signature(timestamp, edgeProperty).unidirected().make();
-            mgmt.buildEdgeIndex(label, "byEdge"+i, Direction.OUT, Order.DESC, timestamp);
+//            mgmt.buildEdgeIndex(label, "byEdge"+i, Direction.OUT, Order.DESC, timestamp);
         }
 
         mgmt.commit();
