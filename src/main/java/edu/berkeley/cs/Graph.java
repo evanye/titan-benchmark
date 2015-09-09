@@ -35,7 +35,7 @@ public class Graph {
 
         intToAtype = new ArrayList<>();
         int atype = 0;
-        for (EdgeLabel label = g.getEdgeLabel(String.valueOf(atype)); label != null; atype++) {
+        for (EdgeLabel label = txn.getEdgeLabel(String.valueOf(atype)); label != null; atype++) {
             intToAtype.add(label);
         }
     }

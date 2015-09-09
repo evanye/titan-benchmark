@@ -48,7 +48,7 @@ public abstract class Benchmark {
     List<String> nodeAttrs2 = new ArrayList<>();
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String benchClassName = args[0];
         String latencyOrThroughput = args[1];
         String name = args[2];
@@ -57,25 +57,16 @@ public abstract class Benchmark {
         int WARMUP_N = Integer.parseInt(args[5]);
         int MEASURE_N = Integer.parseInt(args[6]);
 
-        Class<Benchmark> c = null; //Benchmark.class.getPackage() + "." + benchClassName;
-        try {
-            c = (Class<Benchmark>) Class.forName(benchClassName);
-            Benchmark b = c.newInstance();
-            b.init(name, queryPath, outputPath, WARMUP_N, MEASURE_N);
-            b.readQueries();
-            if ("latency".equals(latencyOrThroughput)) {
-                b.benchLatency();
-            } else if ("throughput".equals(latencyOrThroughput)) {
-                b.benchThroughput();
-            } else {
-                System.err.println("Please choose 'latency' or 'throughput'.");
-            }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+        String fullClassName = Benchmark.class.getPackage().getName() + "." + benchClassName;
+        Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
+        b.init(name, queryPath, outputPath, WARMUP_N, MEASURE_N);
+        b.readQueries();
+        if ("latency".equals(latencyOrThroughput)) {
+            b.benchLatency();
+        } else if ("throughput".equals(latencyOrThroughput)) {
+            b.benchThroughput();
+        } else {
+            System.err.println("Please choose 'latency' or 'throughput'.");
         }
     }
 
