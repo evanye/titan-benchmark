@@ -8,7 +8,38 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class BenchUtils {
+public class Benchmark {
+
+    private static int WARMUP_N;
+    private static int MEASURE_N;
+
+    // get_nhbrs(n)
+    static List<Long> warmupNhbrs = new ArrayList<>();
+    static List<Long> nhbrs = new ArrayList<>();
+
+    // get_nhbrs(n, attr)
+    static List<Long> warmupNhbrNodeIds = new ArrayList<>();
+    static List<Integer> warmupNhbrNodeAttrIds = new ArrayList<>();
+    static List<String> warmupNhbrNodeAttrs = new ArrayList<>();
+    static List<Long> nhbrNodeIds = new ArrayList<>();
+    static List<Integer> nhbrNodeAttrIds = new ArrayList<>();
+    static List<String> nhbrNodeAttrs = new ArrayList<>();
+
+    // get_nhbrs(n, atype)
+    static List<Long> warmupNhbrAtypeIds = new ArrayList<>();
+    static List<Long> warmupNhbrAtypeAtypes = new ArrayList<>();
+    static List<Long> nhbrAtypeIds = new ArrayList<>();
+    static List<Long> nhbrAtypeAtypes = new ArrayList<>();
+
+    // get_nodes(attr) and get_nodes(attr1, attr2)
+    static List<Integer> warmupNodeAttrIds1 = new ArrayList<Integer>();
+    static List<String> warmupNodeAttrs1 = new ArrayList<String>();
+    static List<Integer> warmupNodeAttrIds2 = new ArrayList<Integer>();
+    static List<String> warmupNodeAttrs2 = new ArrayList<String>();
+    static List<Integer> nodeAttrIds1 = new ArrayList<Integer>();
+    static List<String> nodeAttrs1 = new ArrayList<String>();
+    static List<Integer> nodeAttrIds2 = new ArrayList<Integer>();
+    static List<String> nodeAttrs2 = new ArrayList<String>();
 
     public static <T> T modGet(List<T> xs, int i) {
         return xs.get(i % xs.size());
