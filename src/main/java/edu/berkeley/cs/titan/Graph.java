@@ -1,4 +1,4 @@
-package edu.berkeley.cs;
+package edu.berkeley.cs.titan;
 
 import com.thinkaurelius.titan.core.*;
 import com.thinkaurelius.titan.core.util.TitanId;
@@ -98,6 +98,57 @@ public class Graph {
             result.add(neighbor.id);
         }
         return result;
+    }
+
+    /**
+     * TAO Queries
+     */
+
+    public List<String> objGet(long id) {
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        List<String> results = new ArrayList<>();
+        for (String key: node.getPropertyKeys()) {
+            results.add((String) node.getProperty(key));
+        }
+        return results;
+    }
+
+    public List<Assoc> assocRange(long id, int atype, int offset, int length) {
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        List<Assoc> assocs = new ArrayList<>();
+
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+            assocs.add(new Assoc(edge));
+        }
+
+        if (offset < 0 || offset >= assocs.size()) return Collections.emptyList();
+        Collections.sort(assocs);
+        return assocs.subList(offset, Math.min(assocs.size(), offset + length));
+    }
+
+    public List<Assoc> assocGet(long id, int atype, Set<Long> dstIdSet, long low, long high) {
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        List<Assoc> assocs = new ArrayList<>();
+        Assoc assoc;
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+            if (dstIdSet.contains(TitanId.fromVertexID(edge.getOtherVertex(node)))) {
+                assoc = new Assoc(edge);
+                if (assoc.timestamp >= low && assoc.timestamp <= high) {
+                    assocs.add(assoc);
+                }
+            }
+        }
+        Collections.sort(assocs);
+        return assocs;
+    }
+
+    public long assocCount(long id, int atype) {
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        long count = 0;
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+            ++count;
+        }
+        return count;
     }
 
     public void warmup() {
