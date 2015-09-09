@@ -3,54 +3,95 @@ package edu.berkeley.cs.benchmark;
 import edu.berkeley.cs.Graph;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Benchmark {
+public abstract class Benchmark {
 
-    private static int WARMUP_N;
-    private static int MEASURE_N;
+    int WARMUP_N;
+    int MEASURE_N;
 
-    // get_nhbrs(n)
-    static List<Long> warmupNhbrs = new ArrayList<>();
-    static List<Long> nhbrs = new ArrayList<>();
+    Graph g;
+    String queryPath;
+    String outputPath;
 
-    // get_nhbrs(n, attr)
-    static List<Long> warmupNhbrNodeIds = new ArrayList<>();
-    static List<Integer> warmupNhbrNodeAttrIds = new ArrayList<>();
-    static List<String> warmupNhbrNodeAttrs = new ArrayList<>();
-    static List<Long> nhbrNodeIds = new ArrayList<>();
-    static List<Integer> nhbrNodeAttrIds = new ArrayList<>();
-    static List<String> nhbrNodeAttrs = new ArrayList<>();
+    // getNeighbors(n)
+    List<Long> warmupNeighborIds = new ArrayList<>();
+    List<Long> neighborIds = new ArrayList<>();
 
-    // get_nhbrs(n, atype)
-    static List<Long> warmupNhbrAtypeIds = new ArrayList<>();
-    static List<Long> warmupNhbrAtypeAtypes = new ArrayList<>();
-    static List<Long> nhbrAtypeIds = new ArrayList<>();
-    static List<Long> nhbrAtypeAtypes = new ArrayList<>();
+    // getNeighborsNode(n, attr)
+    List<Long> warmupNeighborNodeIds = new ArrayList<>();
+    List<Integer> warmupNeighborNodeAttrIds = new ArrayList<>();
+    List<String> warmupNeighborNodeAttrs = new ArrayList<>();
+    List<Long> neighborNodeIds = new ArrayList<>();
+    List<Integer> neighborNodeAttrIds = new ArrayList<>();
+    List<String> neighborNodeAttrs = new ArrayList<>();
 
-    // get_nodes(attr) and get_nodes(attr1, attr2)
-    static List<Integer> warmupNodeAttrIds1 = new ArrayList<Integer>();
-    static List<String> warmupNodeAttrs1 = new ArrayList<String>();
-    static List<Integer> warmupNodeAttrIds2 = new ArrayList<Integer>();
-    static List<String> warmupNodeAttrs2 = new ArrayList<String>();
-    static List<Integer> nodeAttrIds1 = new ArrayList<Integer>();
-    static List<String> nodeAttrs1 = new ArrayList<String>();
-    static List<Integer> nodeAttrIds2 = new ArrayList<Integer>();
-    static List<String> nodeAttrs2 = new ArrayList<String>();
+    // getNeighbors(n, atype)
+    List<Long> warmupNeighborAtypeIds = new ArrayList<>();
+    List<Integer> warmupNeighborAtype = new ArrayList<>();
+    List<Long> neighborAtypeIds = new ArrayList<>();
+    List<Integer> neighborAtype = new ArrayList<>();
+
+    // getNodes(attr)
+    List<Integer> warmupNodeAttrIds1 = new ArrayList<>();
+    List<String> warmupNodeAttrs1 = new ArrayList<>();
+    List<Integer> nodeAttrIds1 = new ArrayList<>();
+    List<String> nodeAttrs1 = new ArrayList<>();
+    // second set for getNodes(attr1, attr2)
+    List<Integer> warmupNodeAttrIds2 = new ArrayList<>();
+    List<String> warmupNodeAttrs2 = new ArrayList<>();
+    List<Integer> nodeAttrIds2 = new ArrayList<>();
+    List<String> nodeAttrs2 = new ArrayList<>();
+
+
+    public static void main(String[] args) {
+        String benchClassName = args[0];
+        String latencyOrThroughput = args[1];
+        String name = args[2];
+        String queryPath = args[3];
+        String outputPath = args[4];
+        int WARMUP_N = Integer.parseInt(args[5]);
+        int MEASURE_N = Integer.parseInt(args[6]);
+
+        Class<Benchmark> c = null; //Benchmark.class.getPackage() + "." + benchClassName;
+        try {
+            c = (Class<Benchmark>) Class.forName(benchClassName);
+            Benchmark b = c.newInstance();
+            b.init(name, queryPath, outputPath, WARMUP_N, MEASURE_N);
+            b.readQueries();
+            if ("latency".equals(latencyOrThroughput)) {
+                b.benchLatency();
+            } else if ("throughput".equals(latencyOrThroughput)) {
+                b.benchThroughput();
+            } else {
+                System.err.println("Please choose 'latency' or 'throughput'.");
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void init(String titanName, String queryPath, String outputPath, int WARMUP_N, int MEASURE_N) {
+        g = new Graph(titanName);
+        this.queryPath = queryPath; this.outputPath = outputPath;
+        this.WARMUP_N = WARMUP_N; this.MEASURE_N = MEASURE_N;
+    }
+
+    public abstract void readQueries();
+
+    public abstract void benchLatency();
+    public abstract void benchThroughput();
 
     public static <T> T modGet(List<T> xs, int i) {
         return xs.get(i % xs.size());
-    }
-
-    public static <T> void print(String header, List<T> xs, PrintWriter out) {
-        out.println(header);
-        for (T x : xs) {
-            out.printf("%s ", x);
-        }
-        out.println();
     }
 
     public static void fullWarmup(Graph g) {
@@ -73,15 +114,23 @@ public class Benchmark {
                 (allocated - rt.freeMemory()) * 1. / (1L << 30));
     }
 
-    public static void getNodeQueries(
-            String queryPath, List<Integer> warmupAttr1, List<Integer> warmupAttr2,
-            List<String> warmupQuery1, List<String> warmupQuery2,
-            List<Integer> attr1, List<Integer> attr2,
-            List<String> query1, List<String> query2) {
-
-        getNodeQueries(queryPath + "/node_warmup_100000.txt", warmupAttr1, warmupAttr2, warmupQuery1, warmupQuery2);
-        getNodeQueries(queryPath + "/node_query_100000.txt", attr1, attr2, query1, query2);
+    public static void getNeighborQueries(String file, List<Long> neighbors) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            List<String> lines = new ArrayList<>();
+            String line = br.readLine();
+            while (line != null) {
+                lines.add(line);
+                line = br.readLine();
+            }
+            for (int i = 0; i < lines.size(); i++) {
+                neighbors.add(Long.parseLong(lines.get(i)));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+
     public static void getNodeQueries(
             String file, List<Integer> indices1, List<Integer> indices2,
             List<String> queries1, List<String> queries2) {
@@ -102,30 +151,8 @@ public class Benchmark {
         }
     }
 
-    public static void getNeighborQueries(String queryPath, List<Long> warmupNeighbors, List<Long> neighbors) {
-        getNeighborQueries(queryPath + "/neighbor_warmup_100000.txt", warmupNeighbors);
-        getNeighborQueries(queryPath + "/neighbor_query_100000.txt", neighbors);
-    }
-
-    public static void getNeighborQueries(String file, List<Long> nhbrs) {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            List<String> lines = new ArrayList<>();
-            String line = br.readLine();
-            while (line != null) {
-                lines.add(line);
-                line = br.readLine();
-            }
-            for (int i = 0; i < lines.size(); i++) {
-                nhbrs.add(Long.parseLong(lines.get(i)));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public static void getNeighborAtypeQueries(
-            String file, List<Long> nodeIds, List<Long> atypes) {
+            String file, List<Long> nodeIds, List<Integer> atypes) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(file));
@@ -133,22 +160,12 @@ public class Benchmark {
             while (line != null) {
                 String[] toks = line.split(",");
                 nodeIds.add(Long.valueOf(toks[0]));
-                atypes.add(Long.valueOf(toks[1]));
+                atypes.add(Integer.valueOf(toks[1]));
                 line = br.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public static void getNeighborNodeQueries(
-            String query_path, List<Long> warmup_neighbor_indices, List<Long> neighbor_indices,
-            List<Integer> warmup_node_attributes, List<Integer> node_attributes,
-            List<String> warmup_node_queries, List<String> node_queries) {
-        getNeighborNodeQueries(query_path + "/neighbor_node_warmup_100000.txt",
-                warmup_neighbor_indices, warmup_node_attributes, warmup_node_queries);
-        getNeighborNodeQueries(query_path + "/neighbor_node_query_100000.txt",
-                neighbor_indices, node_attributes, node_queries);
     }
 
     public static void getNeighborNodeQueries(
@@ -265,9 +282,10 @@ public class Benchmark {
         }
     }
 
-    public static PrintWriter makeFileWriter(String output_file) {
+    public PrintWriter makeFileWriter(String outputName) {
         try {
-            return new PrintWriter(new BufferedWriter(new FileWriter(output_file)));
+            return new PrintWriter(new BufferedWriter(
+                    new FileWriter(Paths.get(outputPath, outputName).toFile())));
         } catch (IOException e) {
             e.printStackTrace();
             return null;

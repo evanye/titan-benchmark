@@ -1,5 +1,6 @@
 package edu.berkeley.cs;
 
+import com.sun.tools.corba.se.idl.constExpr.Times;
 import com.thinkaurelius.titan.core.*;
 import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
@@ -10,23 +11,21 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
 import java.net.URL;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Graph {
+    final String name;
     final TitanGraph g;
     private TitanTransaction txn;
+    private static List<EdgeLabel> intToAtype;
 
-    public Graph() {
-        URL confURL = getClass().getResource("/benchmark.properties");
+    public Graph(final String name) {
+        this.name = name;
         URL props = getClass().getResource("/titan-cassandra.properties");
         Configuration titanConfiguration = null;
         try {
-            final Configuration config = new PropertiesConfiguration(confURL);
             titanConfiguration = new PropertiesConfiguration(props) {{
-                setProperty("storage.cassandra.keyspace", config.getString("name"));
+                setProperty("storage.cassandra.keyspace", name);
             }};
         } catch (ConfigurationException e) {
             e.printStackTrace();
@@ -34,6 +33,12 @@ public class Graph {
 
         g = TitanFactory.open(titanConfiguration);
         txn = g.buildTransaction().readOnly().start();
+
+        intToAtype = new ArrayList<>();
+        int atype = 0;
+        for (EdgeLabel label = g.getEdgeLabel(String.valueOf(atype)); label != null; atype++) {
+            intToAtype.add(label);
+        }
     }
 
     public void restartTransaction() {
@@ -78,6 +83,24 @@ public class Graph {
         return result;
     }
 
+    public List<Long> getNeighborAtype(long id, int atypeIdx) {
+        List<TimestampedId> neighbors = new ArrayList<>();
+        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atypeIdx))) {
+            TitanVertex neighbor = edge.getOtherVertex(node);
+            neighbors.add(new TimestampedId(
+                    (long) neighbor.getProperty("timestamp"), TitanId.fromVertexID(neighbor))
+            );
+        }
+        Collections.sort(neighbors);
+
+        List<Long> result = new LinkedList<>();
+        for (TimestampedId neighbor: neighbors) {
+            result.add(neighbor.id);
+        }
+        return result;
+    }
+
     public void warmup() {
         restartTransaction();
         long c = 0L;
@@ -108,7 +131,24 @@ public class Graph {
         restartTransaction();
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void shutdown() {
         g.shutdown();
     }
+
+    static class TimestampedId implements Comparable<TimestampedId> {
+        long timestamp, id;
+        public TimestampedId(long timestamp, long id) {
+            this.timestamp = timestamp;
+            this.id = id;
+        }
+        // Larger timestamp comes first.
+        public int compareTo(TimestampedId that) {
+            return Long.compare(this.timestamp, that.timestamp);
+        }
+    }
 }
+

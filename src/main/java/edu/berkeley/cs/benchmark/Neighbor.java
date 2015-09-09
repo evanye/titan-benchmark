@@ -1,12 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
-import edu.berkeley.cs.Graph;
-
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
-
-import static edu.berkeley.cs.benchmark.Benchmark.*;
 
 public class Neighbor extends Benchmark {
     @Override
