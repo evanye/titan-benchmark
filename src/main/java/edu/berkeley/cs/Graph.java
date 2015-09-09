@@ -1,6 +1,5 @@
 package edu.berkeley.cs;
 
-import com.sun.tools.corba.se.idl.constExpr.Times;
 import com.thinkaurelius.titan.core.*;
 import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
