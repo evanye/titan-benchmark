@@ -16,13 +16,18 @@ public class Graph {
     final String name;
     final TitanGraph g;
     private TitanTransaction txn;
-    private static List<EdgeLabel> intToAtype;
+    private int numAtypes;
+    private int numProperties;
+    private static EdgeLabel[] intToAtype;
 
     public Graph(final String name) {
         this.name = name;
         URL props = getClass().getResource("/titan-cassandra.properties");
-        Configuration titanConfiguration = null;
+        URL configUrl = getClass().getResource("/benchmark.properties");
+
+        Configuration titanConfiguration = null, config = null;
         try {
+            config = new PropertiesConfiguration(configUrl);
             titanConfiguration = new PropertiesConfiguration(props) {{
                 setProperty("storage.cassandra.keyspace", name);
             }};
@@ -33,10 +38,11 @@ public class Graph {
         g = TitanFactory.open(titanConfiguration);
         txn = g.buildTransaction().readOnly().start();
 
-        intToAtype = new ArrayList<>();
-        int atype = 0;
-        for (EdgeLabel label = txn.getEdgeLabel(String.valueOf(atype)); label != null; atype++) {
-            intToAtype.add(label);
+        numAtypes = config.getInt("atype.total");
+        numProperties = config.getInt("property.total");
+        intToAtype = new EdgeLabel[numAtypes];
+        for (int i = 0; i < numAtypes; i++) {
+            intToAtype[i] = g.getEdgeLabel(String.valueOf(i));
         }
     }
 
@@ -85,10 +91,10 @@ public class Graph {
     public List<Long> getNeighborAtype(long id, int atypeIdx) {
         List<TimestampedId> neighbors = new ArrayList<>();
         TitanVertex node = getNode(id);
-        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atypeIdx))) {
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atypeIdx])) {
             TitanVertex neighbor = edge.getOtherVertex(node);
             neighbors.add(new TimestampedId(
-                    (long) neighbor.getProperty("timestamp"), TitanId.fromVertexID(neighbor))
+                    (long) edge.getProperty("timestamp"), TitanId.fromVertexID(neighbor))
             );
         }
         Collections.sort(neighbors);
@@ -107,8 +113,8 @@ public class Graph {
     public List<String> objGet(long id) {
         TitanVertex node = getNode(id);
         List<String> results = new ArrayList<>();
-        for (String key: node.getPropertyKeys()) {
-            results.add((String) node.getProperty(key));
+        for (int propIdx = 0; propIdx < numProperties; propIdx++) {
+            results.add((String) node.getProperty("attr" + propIdx));
         }
         return results;
     }
@@ -117,7 +123,7 @@ public class Graph {
         TitanVertex node = getNode(id);
         List<Assoc> assocs = new ArrayList<>();
 
-        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
             assocs.add(new Assoc(edge));
         }
 
@@ -131,7 +137,7 @@ public class Graph {
         TitanVertex node = getNode(id);
         List<Assoc> assocs = new ArrayList<>();
         Assoc assoc;
-        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
             if (dstIdSet.contains(TitanId.fromVertexID(edge.getOtherVertex(node)))) {
                 assoc = new Assoc(edge);
                 if (assoc.timestamp >= low && assoc.timestamp <= high) {
@@ -146,7 +152,7 @@ public class Graph {
     public long assocCount(long id, int atype) {
         TitanVertex node = getNode(id);
         long count = 0;
-        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
             ++count;
         }
         return count;
@@ -157,7 +163,7 @@ public class Graph {
         List<Assoc> assocs = new ArrayList<>();
 
         Assoc assoc;
-        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
             assoc = new Assoc(edge);
             if (assoc.timestamp >= low && assoc.timestamp <= high) {
                 assocs.add(assoc);
@@ -217,7 +223,7 @@ public class Graph {
         }
         // Larger timestamp comes first.
         public int compareTo(TimestampedId that) {
-            return Long.compare(this.timestamp, that.timestamp);
+            return Long.compare(that.timestamp, this.timestamp);
         }
     }
 }

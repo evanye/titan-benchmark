@@ -14,28 +14,38 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
-import java.io.*;
-import java.net.URL;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class Load {
 
     public static void main(String[] args) throws ConfigurationException, IOException {
-        final Configuration config = new PropertiesConfiguration(Load.class.getResource("/benchmark.properties"));
+        Configuration config = new PropertiesConfiguration(
+                Load.class.getResource("/benchmark.properties"));
+        Configuration titanConfiguration = new PropertiesConfiguration(
+                Load.class.getResource("/titan-cassandra.properties"));
+        load(config, titanConfiguration);
 
-        URL props = Load.class.getResource("/titan-cassandra.properties");
-        Configuration titanConfiguration = new PropertiesConfiguration(props) {{
-            setProperty("storage.batch-loading", true);
-            setProperty("schema.default", "none");
-            setProperty("graph.set-vertex-id", true);
-            setProperty("storage.cassandra.keyspace", config.getString("name"));
-        }};
-
-        TitanGraph g = TitanFactory.open(titanConfiguration);
-        createSchemaIfNotExists(g, config);
-        loadGraph(g, config);
         System.exit(0);
+    }
+
+    public static void load(Configuration config, Configuration titanConfig) throws IOException {
+        titanConfig.setProperty("storage.batch-loading", true);
+        titanConfig.setProperty("schema.default", "none");
+        titanConfig.setProperty("graph.set-vertex-id", true);
+        titanConfig.setProperty("storage.cassandra.keyspace", config.getString("name"));
+
+        TitanGraph g = TitanFactory.open(titanConfig);
+        createSchemaIfNotExists(g, config);
+        if (g.getVertices().iterator().hasNext()) {
+            System.err.print("Warning! Graph already has data!");
+        } else {
+            loadGraph(g, config);
+        }
     }
 
     private static void createSchemaIfNotExists(TitanGraph g, Configuration config) {
