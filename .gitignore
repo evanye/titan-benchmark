@@ -7,3 +7,5 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .DS_STORE
+.idea/*
+titan-benchmark.iml
