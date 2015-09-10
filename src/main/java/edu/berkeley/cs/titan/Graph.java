@@ -47,7 +47,7 @@ public class Graph {
 
     public List<Long> getNeighbors(long id) {
         List<Long> neighbors = new LinkedList<>();
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             neighbors.add(TitanId.fromVertexID(edge.getOtherVertex(node)));
         }
@@ -57,7 +57,7 @@ public class Graph {
     public Set<Long> getNodes(int propIdx, String search) {
         Set<Long> nodeIds = new HashSet<>();
         for (Vertex v: txn.getVertices("attr" + propIdx, search)) {
-            long id = Long.parseLong("" + v.getId());
+            long id = Long.parseLong(String.valueOf(v.getId()));
             nodeIds.add(TitanId.fromVertexId(id));
         }
         return nodeIds;
@@ -72,7 +72,7 @@ public class Graph {
 
     public List<Long> getNeighborNode(long id, int propIdx, String search) {
         List<Long> result = new LinkedList<>();
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             TitanVertex neighbor = edge.getOtherVertex(node);
             if (search.equals(neighbor.getProperty("attr" + propIdx))) {
@@ -84,7 +84,7 @@ public class Graph {
 
     public List<Long> getNeighborAtype(long id, int atypeIdx) {
         List<TimestampedId> neighbors = new ArrayList<>();
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atypeIdx))) {
             TitanVertex neighbor = edge.getOtherVertex(node);
             neighbors.add(new TimestampedId(
@@ -105,7 +105,7 @@ public class Graph {
      */
 
     public List<String> objGet(long id) {
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         List<String> results = new ArrayList<>();
         for (String key: node.getPropertyKeys()) {
             results.add((String) node.getProperty(key));
@@ -114,7 +114,7 @@ public class Graph {
     }
 
     public List<Assoc> assocRange(long id, int atype, int offset, int length) {
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         List<Assoc> assocs = new ArrayList<>();
 
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
@@ -126,8 +126,9 @@ public class Graph {
         return assocs.subList(offset, Math.min(assocs.size(), offset + length));
     }
 
+    // TODO: use timestamp sort key
     public List<Assoc> assocGet(long id, int atype, Set<Long> dstIdSet, long low, long high) {
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         List<Assoc> assocs = new ArrayList<>();
         Assoc assoc;
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
@@ -143,12 +144,27 @@ public class Graph {
     }
 
     public long assocCount(long id, int atype) {
-        TitanVertex node = txn.getVertex(TitanId.toVertexId(id));
+        TitanVertex node = getNode(id);
         long count = 0;
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
             ++count;
         }
         return count;
+    }
+
+    public List<Assoc> assocTimeRange(long id, int atype, long low, long high, int limit) {
+        TitanVertex node = getNode(id);
+        List<Assoc> assocs = new ArrayList<>();
+
+        Assoc assoc;
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype.get(atype))) {
+            assoc = new Assoc(edge);
+            if (assoc.timestamp >= low && assoc.timestamp <= high) {
+                assocs.add(assoc);
+            }
+        }
+        Collections.sort(assocs);
+        return assocs.subList(0, Math.min(limit, assocs.size()));
     }
 
     public void warmup() {
@@ -187,6 +203,10 @@ public class Graph {
 
     public void shutdown() {
         g.shutdown();
+    }
+
+    private TitanVertex getNode(long id) {
+        return txn.getVertex(TitanId.toVertexId(id));
     }
 
     static class TimestampedId implements Comparable<TimestampedId> {

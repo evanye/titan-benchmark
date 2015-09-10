@@ -1,6 +1,6 @@
 package edu.berkeley.cs.benchmark;
 
-import edu.berkeley.cs.Graph;
+import edu.berkeley.cs.titan.Graph;
 
 import java.io.*;
 import java.nio.file.Paths;
