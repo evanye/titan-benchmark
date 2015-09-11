@@ -1,6 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 
 public class NeighborAtype extends Benchmark {
@@ -43,7 +44,13 @@ public class NeighborAtype extends Benchmark {
     }
 
     @Override
-    public void benchThroughput() {
-
+    public Collection<?> warmupQuery(int i) {
+        return g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
     }
+
+    @Override
+    public Collection<?> query(int i) {
+        return g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
+    }
+
 }

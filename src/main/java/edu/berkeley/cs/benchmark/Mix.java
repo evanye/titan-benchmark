@@ -1,6 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -124,6 +125,89 @@ public class Mix extends Benchmark {
 
     @Override
     public void benchThroughput() {
+        long seed = 1618L; int randQuery;
+        Random rand = new Random(seed);
 
+        System.out.println("Titan mix query throughput");
+//        Benchmark.fullWarmup(g);
+        System.out.println("Warming up for " + WARMUP_TIME + " nanoseconds");
+        int i = 0;
+        long warmupStart = System.nanoTime();
+        while (System.nanoTime() - warmupStart < WARMUP_TIME) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+
+            randQuery = rand.nextInt(5);
+            switch(randQuery) {
+                case 0:
+                    g.getNeighbors(modGet(warmupNeighborIds, i));
+                    break;
+                case 1:
+                    g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
+                            modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
+                    break;
+                case 2:
+                    g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
+                    break;
+                case 3:
+                    g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
+                    break;
+                case 4:
+                    g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i),
+                            modGet(warmupNodeAttrIds2, i), modGet(warmupNodeAttrs2, i));
+                    break;
+            }
+            ++i;
+        }
+
+        System.out.println("Measuring for " + MEASURE_TIME + " nanoseconds");
+        i = 0;
+        rand.setSeed(1618L); // re-seed
+        long start = System.nanoTime();
+        while (System.nanoTime() - start < MEASURE_TIME) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+            }
+            randQuery = rand.nextInt(5);
+            switch(randQuery) {
+                case 0:
+                    List<Long> neighbors = g.getNeighbors(modGet(neighborIds, i));
+                    break;
+                case 1:
+                    List<Long> neighborNodes = g.getNeighborNode(modGet(neighborNodeIds, i),
+                            modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
+                    break;
+                case 2:
+                    List<Long> neighborAtypes = g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
+                    break;
+                case 3:
+                    Set<Long> nodes = g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
+                    break;
+                case 4:
+                    Set<Long> nodeNodes = g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
+                            modGet(nodeAttrIds2, i), modGet(nodeAttrs2, i));
+                    break;
+            }
+            ++i;
+        }
+        double totalSeconds = (System.nanoTime() - start) * 1. / 1e9;
+        double queryThroughput = ((double) i) / totalSeconds;
+        throughputOut.println("Mix Throughput: " + queryThroughput);
+        throughputOut.close();
+
+        printMemoryFootprint();
     }
+
+    @Override
+    public Collection<?> warmupQuery(int i) {
+        return null;
+    }
+
+    @Override
+    public Collection<?> query(int i) {
+        return null;
+    }
+
 }

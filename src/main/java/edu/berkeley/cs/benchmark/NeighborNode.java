@@ -1,6 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 
 public class NeighborNode extends Benchmark {
@@ -45,7 +46,15 @@ public class NeighborNode extends Benchmark {
     }
 
     @Override
-    public void benchThroughput() {
-
+    public Collection<?> warmupQuery(int i) {
+        return g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
+                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
     }
+
+    @Override
+    public Collection<?> query(int i) {
+        return g.getNeighborNode(modGet(neighborNodeIds, i),
+                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
+    }
+
 }

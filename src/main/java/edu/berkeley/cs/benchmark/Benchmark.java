@@ -4,19 +4,21 @@ import edu.berkeley.cs.titan.Graph;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public abstract class Benchmark {
 
-    int WARMUP_N;
-    int MEASURE_N;
+    public static int WARMUP_N;
+    public static int MEASURE_N;
+
+    public static final long WARMUP_TIME = (long) (60 * 1e9); // 60 seconds
+    public static final long MEASURE_TIME = (long) (120 * 1e9);
+    public static final long COOLDOWN_TIME = (long) (5 * 1e9);
 
     Graph g;
     String queryPath;
     String outputPath;
+    static String benchClassName;
 
     // getNeighbors(n)
     List<Long> warmupNeighborIds = new ArrayList<>();
@@ -47,6 +49,7 @@ public abstract class Benchmark {
     List<Integer> nodeAttrIds2 = new ArrayList<>();
     List<String> nodeAttrs2 = new ArrayList<>();
 
+    PrintWriter throughputOut;
 
     public static void main(String[] args) throws Exception {
         String benchClassName = args[0];
@@ -68,18 +71,61 @@ public abstract class Benchmark {
         } else {
             System.err.println("Please choose 'latency' or 'throughput'.");
         }
+        System.exit(0);
     }
 
     public void init(String titanName, String queryPath, String outputPath, int WARMUP_N, int MEASURE_N) {
         g = new Graph(titanName);
         this.queryPath = queryPath; this.outputPath = outputPath;
         this.WARMUP_N = WARMUP_N; this.MEASURE_N = MEASURE_N;
+        try {
+            throughputOut = new PrintWriter(new FileWriter(
+                    Paths.get(outputPath, g.getName() + "_throughput.csv").toFile(), true));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public abstract void readQueries();
 
     public abstract void benchLatency();
-    public abstract void benchThroughput();
+
+    public abstract Collection<?> warmupQuery(int i);
+    public abstract Collection<?> query(int i);
+
+    public void benchThroughput() {
+        System.out.println("Titan " + benchClassName + " query throughput");
+        System.out.println("Warming up for " + WARMUP_TIME + " nanoseconds");
+        int i = 0;
+        long warmupStart = System.nanoTime();
+        while (System.nanoTime() - warmupStart < WARMUP_TIME) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+            Collection<?> results = warmupQuery(i);
+            ++i;
+        }
+
+        System.out.println("Measuring for " + MEASURE_TIME + " nanoseconds");
+        i = 0;
+        long numResults = 0;
+        long start = System.nanoTime();
+        while (System.nanoTime() - start < MEASURE_TIME) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+            }
+            Collection<?> results = query(i);
+            numResults += results.size();
+            ++i;
+        }
+        double totalSeconds = (System.nanoTime() - start) * 1. / 1e9;
+        double queryThroughput = ((double) i) / totalSeconds;
+        double resultThroughput = ((double) numResults) / totalSeconds;
+        throughputOut.println(benchClassName + " throughput - qps: " + queryThroughput + " edges/second: " + resultThroughput);
+        throughputOut.close();
+        printMemoryFootprint();
+    }
 
     public static <T> T modGet(List<T> xs, int i) {
         return xs.get(i % xs.size());
