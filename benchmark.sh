@@ -32,6 +32,7 @@ warmup=100000
 measure=100000
 
 for test in "${tests[@]}"
+do
   sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
   mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
     -Dexec.args="${test} ${latencyOrThroughput} ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${warmup} ${measure}"
