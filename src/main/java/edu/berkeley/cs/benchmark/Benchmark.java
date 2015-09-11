@@ -52,7 +52,7 @@ public abstract class Benchmark {
     PrintWriter throughputOut;
 
     public static void main(String[] args) throws Exception {
-        String benchClassName = args[0];
+        benchClassName = args[0];
         String latencyOrThroughput = args[1];
         String name = args[2];
         String queryPath = args[3];
