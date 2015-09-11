@@ -6,7 +6,7 @@ public class AssocRange extends BenchTao {
         readAssocRangeQueries(queryPath + "/assocRange_warmup.txt",
                 warmupAssocRangeNodes, warmupAssocRangeAtypes,
                 warmupAssocRangeOffsets, warmupAssocRangeLengths);
-        readAssocRangeQueries(queryPath + "assocRange_query.txt",
+        readAssocRangeQueries(queryPath + "/assocRange_query.txt",
                 assocRangeNodes, assocRangeAtypes,
                 assocRangeOffsets, assocRangeLengths);
     }

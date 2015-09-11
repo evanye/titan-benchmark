@@ -1,15 +1,15 @@
 #!/bin/bash
 set -e
 
-dataset=higgs
-latencyOrThroughput=latency
+dataset=livejournal
 #testMain=edu.berkeley.cs.benchmark.Benchmark
 testMain=edu.berkeley.cs.benchmark.tao.BenchTao
+latencyOrThroughput=latency
 QUERY_DIR=/mnt/liveJournal-40attr16each-queries
-OUTPUT_DIR=/mnt/higgs_output
+OUTPUT_DIR=/mnt/livejournal_output
 
 
-tests=(
+primitive_tests=(
   Neighbor
   NeighborNode
   NeighborAtype
@@ -26,6 +26,13 @@ tao_tests=(
   AssocTimeRange
   Mix
 )
+
+if [[ $testMain == *"Tao"* ]]
+then
+  tests=$tao_tests
+else
+  tests=$primitive_tests
+fi
 
 #JVM_HEAP=6900
 #echo "Setting -Xmx to ${JVM_HEAP}m"
