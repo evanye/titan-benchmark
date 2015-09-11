@@ -13,7 +13,6 @@ public abstract class Benchmark {
 
     public static final long WARMUP_TIME = (long) (60 * 1e9); // 60 seconds
     public static final long MEASURE_TIME = (long) (120 * 1e9);
-    public static final long COOLDOWN_TIME = (long) (5 * 1e9);
 
     Graph g;
     String queryPath;
@@ -95,7 +94,7 @@ public abstract class Benchmark {
 
     public void benchThroughput() {
         System.out.println("Titan " + benchClassName + " query throughput");
-        System.out.println("Warming up for " + WARMUP_TIME + " nanoseconds");
+        System.out.println("Warming up for " + WARMUP_TIME / 1E9 + " seconds");
         int i = 0;
         long warmupStart = System.nanoTime();
         while (System.nanoTime() - warmupStart < WARMUP_TIME) {
@@ -107,7 +106,8 @@ public abstract class Benchmark {
             ++i;
         }
 
-        System.out.println("Measuring for " + MEASURE_TIME + " nanoseconds");
+        System.out.println("Measuring for " + MEASURE_TIME/ 1E9 + " seconds");
+
         i = 0;
         long numResults = 0;
         long start = System.nanoTime();
@@ -218,100 +218,6 @@ public abstract class Benchmark {
                 int idx2 = line.indexOf(',', idx + 1);
                 attributes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
                 queries.add(line.substring(idx2 + 1));
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void readAssocRangeQueries(
-            String file, List<Long> nodes, List<Long> atypes,
-            List<Integer> offsets, List<Integer> lengths) {
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null) {
-                int idx = line.indexOf(',');
-                nodes.add(Long.parseLong(line.substring(0, idx)));
-
-                int idx2 = line.indexOf(',', idx + 1);
-                atypes.add(Long.parseLong(line.substring(idx + 1, idx2)));
-
-                int idx3 = line.indexOf(',', idx2 + 1);
-                offsets.add(Integer.parseInt(line.substring(idx2 + 1, idx3)));
-
-                lengths.add(Integer.parseInt(line.substring(idx3 + 1)));
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void readAssocGetQueries(
-            String file, List<Long> nodes, List<Long> atypes,
-            List<Set<Long>> dstIdSets, List<Long> tLows, List<Long> tHighs) {
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null) {
-                int idx = line.indexOf(',');
-                nodes.add(Long.parseLong(line.substring(0, idx)));
-
-                int idx2 = line.indexOf(',', idx + 1);
-                atypes.add(Long.parseLong(line.substring(idx + 1, idx2)));
-
-                int idx3 = line.indexOf(',', idx2 + 1);
-                tLows.add(Long.parseLong(line.substring(idx2 + 1, idx3)));
-
-                int idx4 = line.indexOf(',', idx3 + 1);
-                tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
-
-                int idxLast = idx4, idxCurr;
-                Set<Long> dstIdSet = new HashSet<>();
-                while (true) {
-                    idxCurr = line.indexOf(',', idxLast + 1);
-                    if (idxCurr == -1) {
-                        break;
-                    }
-                    dstIdSet.add(Long.parseLong(
-                            line.substring(idxLast + 1, idxCurr)));
-                    idxLast = idxCurr;
-                }
-                dstIdSet.add(Long.parseLong(line.substring(idxLast + 1)));
-                dstIdSets.add(dstIdSet);
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void readAssocTimeRangeQueries(
-            String file, List<Long> nodes, List<Long> atypes,
-            List<Long> tLows, List<Long> tHighs, List<Integer> limits) {
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null) {
-                int idx = line.indexOf(',');
-                nodes.add(Long.parseLong(line.substring(0, idx)));
-
-                int idx2 = line.indexOf(',', idx + 1);
-                atypes.add(Long.parseLong(line.substring(idx + 1, idx2)));
-
-                int idx3 = line.indexOf(',', idx2 + 1);
-                tLows.add(Long.parseLong(line.substring(idx2 + 1, idx3)));
-
-                int idx4 = line.indexOf(',', idx3 + 1);
-                tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
-
-                limits.add(Integer.parseInt(line.substring(idx4 + 1)));
-
                 line = br.readLine();
             }
         } catch (IOException e) {
