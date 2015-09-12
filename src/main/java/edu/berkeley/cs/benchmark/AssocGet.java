@@ -26,11 +26,11 @@ public class AssocGet extends Benchmark {
     @Override
     public int warmupQuery(int i) {
         return g.assocGet(
-                modGet(assocGetNodes, i),
-                modGet(assocGetAtypes, i),
-                modGet(assocGetDstIdSets, i),
-                modGet(assocGetTimeLows, i),
-                modGet(assocGetTimeHighs, i)).size();
+                modGet(warmupAssocGetNodes, i),
+                modGet(warmupAssocGetAtypes, i),
+                modGet(warmupAssocGetDstIdSets, i),
+                modGet(warmupAssocGetTimeLows, i),
+                modGet(warmupAssocGetTimeHighs, i)).size();
     }
 
     @Override
