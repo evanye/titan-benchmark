@@ -13,6 +13,7 @@ public abstract class Benchmark {
 
     public static final long WARMUP_TIME = (long) (60 * 1e9); // 60 seconds
     public static final long MEASURE_TIME = (long) (120 * 1e9);
+    public static final long COOLDOWN_TIME = (long) (30 * 1e9);
 
     Graph g;
     static String queryPath;
@@ -100,8 +101,9 @@ public abstract class Benchmark {
         String name = args[2];
         queryPath = args[3];
         outputPath = args[4];
-        WARMUP_N = Integer.parseInt(args[5]);
-        MEASURE_N = Integer.parseInt(args[6]);
+        int numClients = Integer.parseInt(args[5]);
+        WARMUP_N = Integer.parseInt(args[6]);
+        MEASURE_N = Integer.parseInt(args[7]);
 
         String fullClassName = Benchmark.class.getPackage().getName() + "." + benchClassName;
         Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
@@ -110,7 +112,7 @@ public abstract class Benchmark {
         if ("latency".equals(latencyOrThroughput)) {
             b.benchLatency();
         } else if ("throughput".equals(latencyOrThroughput)) {
-            b.benchThroughput();
+            b.benchThroughput(numClients);
         } else {
             System.err.println("Please choose 'latency' or 'throughput'.");
         }
@@ -159,7 +161,7 @@ public abstract class Benchmark {
         Benchmark.printMemoryFootprint();
     }
 
-    public void benchThroughput() {
+    public void benchThroughput(int numClients) {
         System.out.println("Titan " + benchClassName + " query throughput");
         System.out.println("Warming up for " + WARMUP_TIME / 1E9 + " seconds");
         int i = 0;
