@@ -15,9 +15,10 @@ public abstract class Benchmark {
     public static final long MEASURE_TIME = (long) (120 * 1e9);
 
     Graph g;
-    String queryPath;
-    String outputPath;
+    static String queryPath;
+    static String outputPath;
     static String benchClassName;
+    PrintWriter throughputOut;
 
     // getNeighbors(n)
     List<Long> warmupNeighborIds = new ArrayList<>();
@@ -48,20 +49,63 @@ public abstract class Benchmark {
     List<Integer> nodeAttrIds2 = new ArrayList<>();
     List<String> nodeAttrs2 = new ArrayList<>();
 
-    PrintWriter throughputOut;
+    // assoc_range()
+    List<Long> warmupAssocRangeNodes = new ArrayList<>();
+    List<Long> assocRangeNodes = new ArrayList<>();
+    List<Integer> warmupAssocRangeAtypes = new ArrayList<>();
+    List<Integer> assocRangeAtypes = new ArrayList<>();
+    List<Integer> warmupAssocRangeOffsets = new ArrayList<>();
+    List<Integer> assocRangeOffsets = new ArrayList<>();
+    List<Integer> warmupAssocRangeLengths = new ArrayList<>();
+    List<Integer> assocRangeLengths = new ArrayList<>();
+
+    // assoc_count()
+    List<Long> warmupAssocCountNodes = new ArrayList<>();
+    List<Long> assocCountNodes = new ArrayList<>();
+    List<Integer> warmupAssocCountAtypes = new ArrayList<>();
+    List<Integer> assocCountAtypes = new ArrayList<>();
+
+    // obj_get()
+    List<Long> warmupObjGetIds = new ArrayList<>();
+    List<Long> objGetIds = new ArrayList<>();
+
+    // assoc_get()
+    List<Long> warmupAssocGetNodes = new ArrayList<>();
+    List<Long> assocGetNodes = new ArrayList<>();
+    List<Integer> warmupAssocGetAtypes = new ArrayList<>();
+    List<Integer> assocGetAtypes = new ArrayList<>();
+    List<Set<Long>> warmupAssocGetDstIdSets = new ArrayList<>();
+    List<Set<Long>> assocGetDstIdSets = new ArrayList<>();
+    List<Long> warmupAssocGetTimeLows = new ArrayList<>();
+    List<Long> assocGetTimeLows = new ArrayList<>();
+    List<Long> warmupAssocGetTimeHighs = new ArrayList<>();
+    List<Long> assocGetTimeHighs = new ArrayList<>();
+
+    // assoc_time_range()
+    List<Long> warmupAssocTimeRangeNodes = new ArrayList<>();
+    List<Long> assocTimeRangeNodes = new ArrayList<>();
+    List<Integer> warmupAssocTimeRangeAtypes = new ArrayList<>();
+    List<Integer> assocTimeRangeAtypes = new ArrayList<>();
+    List<Long> warmupAssocTimeRangeTimeLows = new ArrayList<>();
+    List<Long> assocTimeRangeTimeLows = new ArrayList<>();
+    List<Long> warmupAssocTimeRangeTimeHighs = new ArrayList<>();
+    List<Long> assocTimeRangeTimeHighs = new ArrayList<>();
+    List<Integer> warmupAssocTimeRangeLimits = new ArrayList<>();
+    List<Integer> assocTimeRangeLimits = new ArrayList<>();
+
 
     public static void main(String[] args) throws Exception {
         benchClassName = args[0];
         String latencyOrThroughput = args[1];
         String name = args[2];
-        String queryPath = args[3];
-        String outputPath = args[4];
-        int WARMUP_N = Integer.parseInt(args[5]);
-        int MEASURE_N = Integer.parseInt(args[6]);
+        queryPath = args[3];
+        outputPath = args[4];
+        WARMUP_N = Integer.parseInt(args[5]);
+        MEASURE_N = Integer.parseInt(args[6]);
 
         String fullClassName = Benchmark.class.getPackage().getName() + "." + benchClassName;
         Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
-        b.init(name, queryPath, outputPath, WARMUP_N, MEASURE_N);
+        b.init(name);
         b.readQueries();
         if ("latency".equals(latencyOrThroughput)) {
             b.benchLatency();
@@ -73,10 +117,8 @@ public abstract class Benchmark {
         System.exit(0);
     }
 
-    public void init(String titanName, String queryPath, String outputPath, int WARMUP_N, int MEASURE_N) {
+    public void init(String titanName) {
         g = new Graph(titanName);
-        this.queryPath = queryPath; this.outputPath = outputPath;
-        this.WARMUP_N = WARMUP_N; this.MEASURE_N = MEASURE_N;
         try {
             throughputOut = new PrintWriter(new FileWriter(
                     Paths.get(outputPath, g.getName() + "_throughput.csv").toFile(), true));
@@ -86,11 +128,36 @@ public abstract class Benchmark {
     }
 
     public abstract void readQueries();
+    public abstract int warmupQuery(int i);
+    public abstract int query(int i);
 
-    public abstract void benchLatency();
+    public void benchLatency() {
+        PrintWriter out = makeFileWriter(g.getName() + "_" + benchClassName + ".csv");
+        System.out.println("Titan " + benchClassName + " query latency");
+        System.out.println("Warming up for " + WARMUP_N + " queries");
+        for (int i = 0; i < WARMUP_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Warmed up for " + i + " queries");
+            }
+            warmupQuery(i);
+        }
 
-    public abstract Collection<?> warmupQuery(int i);
-    public abstract Collection<?> query(int i);
+        System.out.println("Measuring for " + MEASURE_N + " queries");
+        for (int i = 0; i < MEASURE_N; i++) {
+            if (i % 10000 == 0) {
+                g.restartTransaction();
+                System.out.println("Measured for " + i + " queries");
+            }
+            long start = System.nanoTime();
+            int numResults = query(i);
+            long end = System.nanoTime();
+            double microsecs = (end - start) / ((double) 1000);
+            out.println(numResults + "," + microsecs);
+        }
+        out.close();
+        Benchmark.printMemoryFootprint();
+    }
 
     public void benchThroughput() {
         System.out.println("Titan " + benchClassName + " query throughput");
@@ -102,7 +169,7 @@ public abstract class Benchmark {
                 g.restartTransaction();
                 System.out.println("Warmed up for " + i + " queries");
             }
-            Collection<?> results = warmupQuery(i);
+            int numResults = warmupQuery(i);
             ++i;
         }
 
@@ -115,14 +182,13 @@ public abstract class Benchmark {
             if (i % 10000 == 0) {
                 g.restartTransaction();
             }
-            Collection<?> results = query(i);
-            numResults += results.size();
+            numResults += query(i);
             ++i;
         }
         double totalSeconds = (System.nanoTime() - start) * 1. / 1e9;
         double queryThroughput = ((double) i) / totalSeconds;
         double resultThroughput = ((double) numResults) / totalSeconds;
-        throughputOut.println(benchClassName + " throughput - qps: " + queryThroughput + " edges/second: " + resultThroughput);
+        throughputOut.println(benchClassName + " throughput - qps: " + queryThroughput + " results/second: " + resultThroughput);
         throughputOut.close();
         printMemoryFootprint();
     }
@@ -151,9 +217,9 @@ public abstract class Benchmark {
                 (allocated - rt.freeMemory()) * 1. / (1L << 30));
     }
 
-    public static void getNeighborQueries(String file, List<Long> neighbors) {
+    static void getLong(String file, List<Long> neighbors) {
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
             List<String> lines = new ArrayList<>();
             String line = br.readLine();
             while (line != null) {
@@ -168,56 +234,16 @@ public abstract class Benchmark {
         }
     }
 
-    public static void getNodeQueries(
-            String file, List<Integer> indices1, List<Integer> indices2,
-            List<String> queries1, List<String> queries2) {
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null) {
-                String[] tokens = line.split("\\x02");
-                indices1.add(Integer.parseInt(tokens[0]));
-                queries1.add(tokens[1]);
-                indices2.add(Integer.parseInt(tokens[2]));
-                queries2.add(tokens[3]);
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void getNeighborAtypeQueries(
+    static void getLongInteger(
             String file, List<Long> nodeIds, List<Integer> atypes) {
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
+            BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
             String line = br.readLine();
             while (line != null) {
                 String[] toks = line.split(",");
                 nodeIds.add(Long.valueOf(toks[0]));
                 atypes.add(Integer.valueOf(toks[1]));
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void getNeighborNodeQueries(
-            String file, List<Long> indices,
-            List<Integer> attributes, List<String> queries) {
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-            while (line != null) {
-                int idx = line.indexOf(',');
-                indices.add(Long.parseLong(line.substring(0, idx)));
-                int idx2 = line.indexOf(',', idx + 1);
-                attributes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
-                queries.add(line.substring(idx2 + 1));
                 line = br.readLine();
             }
         } catch (IOException e) {

@@ -1,56 +1,23 @@
 package edu.berkeley.cs.benchmark;
 
-import java.io.PrintWriter;
-import java.util.Collection;
-import java.util.List;
-
 public class NeighborAtype extends Benchmark {
+    public static final String WARMUP_FILE = "neighborAtype_warmup_100000.txt";
+    public static final String QUERY_FILE = "neighborAtype_query_100000.txt";
+
     @Override
     public void readQueries() {
-        getNeighborAtypeQueries(queryPath + "/neighborAtype_warmup_100000.txt",
-                warmupNeighborAtypeIds, warmupNeighborAtype);
-        getNeighborAtypeQueries(queryPath + "/neighborAtype_query_100000.txt",
-                neighborAtypeIds, neighborAtype);
+        getLongInteger(WARMUP_FILE, warmupNeighborAtypeIds, warmupNeighborAtype);
+        getLongInteger(QUERY_FILE, neighborAtypeIds, neighborAtype);
     }
 
     @Override
-    public void benchLatency() {
-        PrintWriter out = makeFileWriter(g.getName() + "_" + "neighbor_node.csv");
-        System.out.println("Titan getNeighborAtype query latency");
-//        Benchmark.fullWarmup(g);
-        System.out.println("Warming up for " + WARMUP_N + " queries");
-        for (int i = 0; i < WARMUP_N; i++) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-                System.out.println("Warmed up for " + i + " queries");
-            }
-            List<Long> nodes = g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
-        }
-
-        System.out.println("Measuring for " + MEASURE_N + " queries");
-        for (int i = 0; i < MEASURE_N; i++) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-                System.out.println("Measured for " + i + " queries");
-            }
-            long start = System.nanoTime();
-            List<Long> nodes = g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
-            long end = System.nanoTime();
-            double microsecs = (end - start) / ((double) 1000);
-            out.println(nodes.size() + "," + microsecs);
-        }
-        out.close();
-        printMemoryFootprint();
+    public int warmupQuery(int i) {
+        return g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i)).size();
     }
 
     @Override
-    public Collection<?> warmupQuery(int i) {
-        return g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
-    }
-
-    @Override
-    public Collection<?> query(int i) {
-        return g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
+    public int query(int i) {
+        return g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i)).size();
     }
 
 }

@@ -1,60 +1,50 @@
 package edu.berkeley.cs.benchmark;
 
-import java.io.PrintWriter;
-import java.util.Collection;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
 
 public class NeighborNode extends Benchmark {
+    public static final String WARMUP_FILE = "neighbor_node_warmup_100000.txt";
+    public static final String QUERY_FILE = "neighbor_node_query_100000.txt";
+
     @Override
     public void readQueries() {
-        getNeighborNodeQueries(queryPath + "/neighbor_node_warmup_100000.txt",
-                warmupNeighborNodeIds, warmupNeighborNodeAttrIds, warmupNeighborNodeAttrs);
-        getNeighborNodeQueries(queryPath + "/neighbor_node_query_100000.txt",
-                neighborNodeIds, neighborNodeAttrIds, neighborNodeAttrs);
+        getNeighborNodeQueries(WARMUP_FILE, warmupNeighborNodeIds, warmupNeighborNodeAttrIds, warmupNeighborNodeAttrs);
+        getNeighborNodeQueries(QUERY_FILE, neighborNodeIds, neighborNodeAttrIds, neighborNodeAttrs);
     }
 
     @Override
-    public void benchLatency() {
-        PrintWriter out = makeFileWriter(g.getName() + "_" + "neighbor_node.csv");
-        System.out.println("Titan getNeighborNode query latency");
-//        Benchmark.fullWarmup(g);
-        System.out.println("Warming up for " + WARMUP_N + " queries");
-        for (int i = 0; i < WARMUP_N; i++) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-                System.out.println("Warmed up for " + i + " queries");
-            }
-            List<Long> nodes = g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
-                    modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
-        }
-
-        System.out.println("Measuring for " + MEASURE_N + " queries");
-        for (int i = 0; i < MEASURE_N; i++) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-                System.out.println("Measured for " + i + " queries");
-            }
-            long start = System.nanoTime();
-            List<Long> nodes = g.getNeighborNode(modGet(neighborNodeIds, i),
-                    modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
-            long end = System.nanoTime();
-            double microsecs = (end - start) / ((double) 1000);
-            out.println(nodes.size() + "," + microsecs);
-        }
-        out.close();
-        printMemoryFootprint();
-    }
-
-    @Override
-    public Collection<?> warmupQuery(int i) {
+    public int warmupQuery(int i) {
         return g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
-                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
+                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i)).size();
     }
 
     @Override
-    public Collection<?> query(int i) {
+    public int query(int i) {
         return g.getNeighborNode(modGet(neighborNodeIds, i),
-                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
+                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i)).size();
+    }
+
+    static void getNeighborNodeQueries(
+            String file, List<Long> indices,
+            List<Integer> attributes, List<String> queries) {
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
+            String line = br.readLine();
+            while (line != null) {
+                int idx = line.indexOf(',');
+                indices.add(Long.parseLong(line.substring(0, idx)));
+                int idx2 = line.indexOf(',', idx + 1);
+                attributes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
+                queries.add(line.substring(idx2 + 1));
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

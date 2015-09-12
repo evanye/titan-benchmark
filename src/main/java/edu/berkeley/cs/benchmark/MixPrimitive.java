@@ -1,45 +1,44 @@
 package edu.berkeley.cs.benchmark;
 
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-public class Mix extends Benchmark {
+public class MixPrimitive extends Benchmark {
+    private static final long SEED = 1618L;
+
     @Override
     public void readQueries() {
-        getNeighborQueries(queryPath + "/neighbor_warmup_100000.txt", warmupNeighborIds);
-        getNeighborQueries(queryPath + "/neighbor_query_100000.txt", neighborIds);
+        getLong(Neighbor.WARMUP_FILE, warmupNeighborIds);
+        getLong(Neighbor.QUERY_FILE, neighborIds);
 
-        getNeighborNodeQueries(queryPath + "/neighbor_node_warmup_100000.txt",
+        Node.getNodeQueries(Node.WARMUP_FILE,
+                warmupNodeAttrIds1, warmupNodeAttrIds2, warmupNodeAttrs1, warmupNodeAttrs2);
+        Node.getNodeQueries(Node.QUERY_FILE,
+                nodeAttrIds1, nodeAttrIds2, nodeAttrs1, nodeAttrs2);
+
+        NeighborNode.getNeighborNodeQueries(NeighborNode.WARMUP_FILE,
                 warmupNeighborNodeIds, warmupNeighborNodeAttrIds, warmupNeighborNodeAttrs);
-        getNeighborNodeQueries(queryPath + "/neighbor_node_query_100000.txt",
+        NeighborNode.getNeighborNodeQueries(NeighborNode.QUERY_FILE,
                 neighborNodeIds, neighborNodeAttrIds, neighborNodeAttrs);
 
-        getNeighborAtypeQueries(queryPath + "/neighborAtype_warmup_100000.txt",
-                warmupNeighborAtypeIds, warmupNeighborAtype);
-        getNeighborAtypeQueries(queryPath + "/neighborAtype_query_100000.txt",
-                neighborAtypeIds, neighborAtype);
-
-        getNodeQueries(queryPath + "/node_warmup_100000.txt",
-                warmupNodeAttrIds1, warmupNodeAttrIds2, warmupNodeAttrs1, warmupNodeAttrs2);
-        getNodeQueries(queryPath + "/node_query_100000.txt", nodeAttrIds1, nodeAttrIds2, nodeAttrs1, nodeAttrs2);
+        NeighborAtype.getLongInteger(NeighborAtype.WARMUP_FILE, warmupNeighborAtypeIds, warmupNeighborAtype);
+        NeighborAtype.getLongInteger(NeighborAtype.QUERY_FILE, neighborAtypeIds, neighborAtype);
     }
 
     @Override
     public void benchLatency() {
-        PrintWriter neighborOut = makeFileWriter(g.getName() + "_mix_neighbor.csv");
-        PrintWriter neighborNodeOut = makeFileWriter(g.getName() + "_mix_neighbor_node.csv");
-        PrintWriter neighborAtypeOut = makeFileWriter(g.getName() + "_mix_neighbor_atype.csv");
-        PrintWriter nodeOut = makeFileWriter(g.getName() + "_mix_node.csv");
-        PrintWriter nodeNodeOut = makeFileWriter(g.getName() + "_mix_node_node.csv");
+        PrintWriter neighborOut = makeFileWriter(g.getName() + "_mix_Neighbor.csv");
+        PrintWriter neighborNodeOut = makeFileWriter(g.getName() + "_mix_NeighborNode.csv");
+        PrintWriter neighborAtypeOut = makeFileWriter(g.getName() + "_mix_NeighborAtype.csv");
+        PrintWriter nodeOut = makeFileWriter(g.getName() + "_mix_Node.csv");
+        PrintWriter nodeNodeOut = makeFileWriter(g.getName() + "_mix_NodeNode.csv");
 
-        long seed = 1618L; int randQuery;
-        Random rand = new Random(seed);
+        int randQuery;
+        Random rand = new Random(SEED);
 
         System.out.println("Titan mix query latency");
-//        Benchmark.fullWarmup(g);
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
@@ -69,7 +68,7 @@ public class Mix extends Benchmark {
             }
         }
 
-        rand.setSeed(1618L); // re-seed
+        rand.setSeed(SEED); // re-seed
         long start, end;
 
         System.out.println("Measuring for " + MEASURE_N + " queries");
@@ -125,11 +124,10 @@ public class Mix extends Benchmark {
 
     @Override
     public void benchThroughput() {
-        long seed = 1618L; int randQuery;
-        Random rand = new Random(seed);
+        int randQuery;
+        Random rand = new Random(SEED);
 
         System.out.println("Titan mix query throughput");
-//        Benchmark.fullWarmup(g);
         System.out.println("Warming up for " + WARMUP_TIME + " nanoseconds");
         int i = 0;
         long warmupStart = System.nanoTime();
@@ -164,7 +162,7 @@ public class Mix extends Benchmark {
 
         System.out.println("Measuring for " + MEASURE_TIME + " nanoseconds");
         i = 0;
-        rand.setSeed(1618L); // re-seed
+        rand.setSeed(SEED); // re-seed
         long start = System.nanoTime();
         while (System.nanoTime() - start < MEASURE_TIME) {
             if (i % 10000 == 0) {
@@ -194,20 +192,20 @@ public class Mix extends Benchmark {
         }
         double totalSeconds = (System.nanoTime() - start) * 1. / 1e9;
         double queryThroughput = ((double) i) / totalSeconds;
-        throughputOut.println("Mix Throughput: " + queryThroughput);
+        throughputOut.println("MixPrimitive Throughput: " + queryThroughput);
         throughputOut.close();
 
         printMemoryFootprint();
     }
 
     @Override
-    public Collection<?> warmupQuery(int i) {
-        return null;
+    public int warmupQuery(int i) {
+        return Integer.MIN_VALUE;
     }
 
     @Override
-    public Collection<?> query(int i) {
-        return null;
+    public int query(int i) {
+        return Integer.MIN_VALUE;
     }
 
 }

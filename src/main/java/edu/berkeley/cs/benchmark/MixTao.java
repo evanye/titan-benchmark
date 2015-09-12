@@ -1,13 +1,12 @@
-package edu.berkeley.cs.benchmark.tao;
+package edu.berkeley.cs.benchmark;
 
-import edu.berkeley.cs.benchmark.Benchmark;
 import edu.berkeley.cs.titan.Assoc;
 
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
 
-public class Mix extends BenchTao {
+public class MixTao extends Benchmark {
     // Read workload distribution; from ATC 13 Bronson et al.
     final static double ASSOC_RANGE_PERC = 0.409;
     final static double OBJ_GET_PERC = 0.289;
@@ -21,41 +20,38 @@ public class Mix extends BenchTao {
     @Override
     public void readQueries() {
         // assoc_range()
-        readAssocRangeQueries(queryPath + "/assocRange_warmup.txt",
+        AssocRange.readAssocRangeQueries(AssocRange.WARMUP_FILE,
                 warmupAssocRangeNodes, warmupAssocRangeAtypes,
                 warmupAssocRangeOffsets, warmupAssocRangeLengths);
-        readAssocRangeQueries(queryPath + "/assocRange_query.txt",
+        AssocRange.readAssocRangeQueries(AssocRange.QUERY_FILE,
                 assocRangeNodes, assocRangeAtypes,
                 assocRangeOffsets, assocRangeLengths);
 
         // assoc_count()
-        readAssocCountQueries(queryPath + "/assocCount_warmup.txt",
-                warmupAssocCountNodes, warmupAssocCountAtypes);
-
-        readAssocCountQueries(queryPath + "/assocCount_query.txt",
-                assocCountNodes, assocCountAtypes);
+        getLongInteger(AssocCount.WARMUP_FILE, warmupAssocCountNodes, warmupAssocCountAtypes);
+        getLongInteger(AssocCount.QUERY_FILE, assocCountNodes, assocCountAtypes);
 
         // obj_get()
-        Benchmark.getNeighborQueries(queryPath + "/objGet_warmup.txt", warmupObjGetIds);
-        Benchmark.getNeighborQueries(queryPath + "/objGet_query.txt", objGetIds);
+        getLong(ObjGet.WARMUP_FILE, warmupObjGetIds);
+        getLong(ObjGet.QUERY_FILE, objGetIds);
 
         // assoc_get()
-        readAssocGetQueries(queryPath + "/assocGet_warmup.txt",
+        AssocGet.readAssocGetQueries(AssocGet.WARMUP_FILE,
                 warmupAssocGetNodes, warmupAssocGetAtypes,
                 warmupAssocGetDstIdSets, warmupAssocGetTimeLows,
                 warmupAssocGetTimeHighs);
 
-        readAssocGetQueries(queryPath + "/assocGet_query.txt",
+        AssocGet.readAssocGetQueries(AssocGet.QUERY_FILE,
                 assocGetNodes, assocGetAtypes,
                 assocGetDstIdSets, assocGetTimeLows, assocGetTimeHighs);
 
         // assoc_time_range()
-        readAssocTimeRangeQueries(queryPath + "/assocTimeRange_warmup.txt",
+        AssocTimeRange.readAssocTimeRangeQueries(AssocTimeRange.WARMUP_FILE,
                 warmupAssocTimeRangeNodes,
                 warmupAssocTimeRangeAtypes, warmupAssocTimeRangeTimeLows,
                 warmupAssocTimeRangeTimeHighs, warmupAssocTimeRangeLimits);
 
-        readAssocTimeRangeQueries(queryPath + "/assocTimeRange_query.txt",
+        AssocTimeRange.readAssocTimeRangeQueries(AssocTimeRange.QUERY_FILE,
                 assocTimeRangeNodes, assocTimeRangeAtypes,
                 assocTimeRangeTimeLows, assocTimeRangeTimeHighs,
                 assocTimeRangeLimits);
@@ -167,7 +163,7 @@ public class Mix extends BenchTao {
 
     @Override
     public void benchLatency() {
-        PrintWriter assocRangeOut = makeFileWriter(g.getName() + "_mix_assocRangecsv");
+        PrintWriter assocRangeOut = makeFileWriter(g.getName() + "_mix_assocRange.csv");
         PrintWriter objGetOut = makeFileWriter(g.getName() + "_mix_objGet.csv");
         PrintWriter assocGetOut = makeFileWriter(g.getName() + "_mix_assocGet.csv");
         PrintWriter assocCountOut = makeFileWriter(g.getName() + "_mix_assocCount.csv");
@@ -175,7 +171,7 @@ public class Mix extends BenchTao {
 
         Random rand = new Random(SEED);
 
-        System.out.println("Titan Mix tao query latency");
+        System.out.println("Titan MixPrimitive tao query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
