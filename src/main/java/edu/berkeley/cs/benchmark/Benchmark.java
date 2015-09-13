@@ -12,7 +12,6 @@ public abstract class Benchmark {
     public static int WARMUP_N;
     public static int MEASURE_N;
 
-    Graph g;
     static String name;
     static String queryPath;
     static String outputPath;
@@ -130,7 +129,7 @@ public abstract class Benchmark {
     }
 
     public void benchLatency() {
-        g = new Graph();
+        Graph g = new Graph();
         PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
@@ -247,7 +246,7 @@ public abstract class Benchmark {
         }
     }
 
-    public PrintWriter makeFileWriter(String outputName, boolean append) {
+    public static PrintWriter makeFileWriter(String outputName, boolean append) {
         try {
             return new PrintWriter(new BufferedWriter(
                     new FileWriter(Paths.get(outputPath, name + "_" + outputName).toFile(), append)));

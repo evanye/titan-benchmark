@@ -76,6 +76,7 @@ public class MixTao extends Benchmark {
 
     @Override
     public void benchLatency() {
+        Graph graph = new Graph();
         PrintWriter assocRangeOut = makeFileWriter("mix_AssocRange.csv", false);
         PrintWriter objGetOut = makeFileWriter("mix_ObjGet.csv", false);
         PrintWriter assocGetOut = makeFileWriter("mix_AssocGet.csv", false);
@@ -88,24 +89,24 @@ public class MixTao extends Benchmark {
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
-                g.restartTransaction();
+                graph.restartTransaction();
                 System.out.println("Warmed up for " + i + " queries");
             }
 
             switch (chooseQuery(rand)) {
                 case 0:
                     // assoc_range
-                    g.assocRange(
+                    graph.assocRange(
                             modGet(warmupAssocRangeNodes, i),
                             modGet(warmupAssocRangeAtypes, i),
                             modGet(warmupAssocRangeOffsets, i),
                             modGet(warmupAssocRangeLengths, i)).size();
                 case 1:
                     // obj_get
-                    g.objGet(modGet(warmupObjGetIds, i)).size();
+                    graph.objGet(modGet(warmupObjGetIds, i)).size();
                 case 2:
                     // assoc_get
-                    g.assocGet(
+                    graph.assocGet(
                             modGet(warmupAssocGetNodes, i),
                             modGet(warmupAssocGetAtypes, i),
                             modGet(warmupAssocGetDstIdSets, i),
@@ -114,13 +115,13 @@ public class MixTao extends Benchmark {
                 case 3:
                     // assoc_count
                     i = rand.nextInt(warmupAssocCountNodes.size());
-                    g.assocCount(
+                    graph.assocCount(
                             modGet(warmupAssocCountNodes, i),
                             modGet(warmupAssocCountAtypes, i));
                 case 4:
                     // assoc_time_range
                     i = rand.nextInt(warmupAssocTimeRangeNodes.size());
-                    g.assocTimeRange(
+                    graph.assocTimeRange(
                             modGet(warmupAssocTimeRangeNodes, i),
                             modGet(warmupAssocTimeRangeAtypes, i),
                             modGet(warmupAssocTimeRangeTimeLows, i),
@@ -135,7 +136,7 @@ public class MixTao extends Benchmark {
         System.out.println("Measuring for " + MEASURE_N + " queries");
         for (int i = 0; i < MEASURE_N; i++) {
             if (i % 10000 == 0) {
-                g.restartTransaction();
+                graph.restartTransaction();
                 System.out.println("Measured for " + i + " queries");
             }
             List<Assoc> assocs;
@@ -143,7 +144,7 @@ public class MixTao extends Benchmark {
                 case 0:
                     // assoc_range
                     start = System.nanoTime();
-                    assocs = g.assocRange(
+                    assocs = graph.assocRange(
                             modGet(assocRangeNodes, i),
                             modGet(assocRangeAtypes, i),
                             modGet(assocRangeOffsets, i),
@@ -155,7 +156,7 @@ public class MixTao extends Benchmark {
                 case 1:
                     // obj_get
                     start = System.nanoTime();
-                    List<String> attrs = g.objGet(modGet(objGetIds, i));
+                    List<String> attrs = graph.objGet(modGet(objGetIds, i));
                     end = System.nanoTime();
                     objGetOut.println(
                             attrs.size() + "," + (end - start) / 1e3);
@@ -163,7 +164,7 @@ public class MixTao extends Benchmark {
                 case 2:
                     // assoc_get
                     start = System.nanoTime();
-                    assocs = g.assocGet(
+                    assocs = graph.assocGet(
                             modGet(assocGetNodes, i),
                             modGet(assocGetAtypes, i),
                             modGet(assocGetDstIdSets, i),
@@ -176,7 +177,7 @@ public class MixTao extends Benchmark {
                 case 3:
                     // assoc_count
                     start = System.nanoTime();
-                    long count = g.assocCount(
+                    long count = graph.assocCount(
                             modGet(assocCountNodes, i),
                             modGet(assocCountAtypes, i));
                     end = System.nanoTime();
@@ -186,7 +187,7 @@ public class MixTao extends Benchmark {
                 case 4:
                     // assoc_time_range
                     start = System.nanoTime();
-                    assocs = g.assocTimeRange(
+                    assocs = graph.assocTimeRange(
                             modGet(assocTimeRangeNodes, i),
                             modGet(assocTimeRangeAtypes, i),
                             modGet(assocTimeRangeTimeLows, i),

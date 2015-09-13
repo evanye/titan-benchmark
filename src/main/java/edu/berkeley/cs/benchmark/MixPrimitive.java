@@ -30,6 +30,7 @@ public class MixPrimitive extends Benchmark {
 
     @Override
     public void benchLatency() {
+        Graph graph = new Graph();
         PrintWriter neighborOut = makeFileWriter("mix_Neighbor.csv", false);
         PrintWriter neighborNodeOut = makeFileWriter("mix_NeighborNode.csv", false);
         PrintWriter neighborAtypeOut = makeFileWriter("mix_NeighborAtype.csv", false);
@@ -43,27 +44,27 @@ public class MixPrimitive extends Benchmark {
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
             if (i % 10000 == 0) {
-                g.restartTransaction();
+                graph.restartTransaction();
                 System.out.println("Warmed up for " + i + " queries");
             }
 
             randQuery = rand.nextInt(5);
             switch(randQuery) {
                 case 0:
-                    g.getNeighbors(modGet(warmupNeighborIds, i));
+                    graph.getNeighbors(modGet(warmupNeighborIds, i));
                     break;
                 case 1:
-                    g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
+                    graph.getNeighborNode(modGet(warmupNeighborNodeIds, i),
                             modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
                     break;
                 case 2:
-                    g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
+                    graph.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
                     break;
                 case 3:
-                    g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
+                    graph.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
                     break;
                 case 4:
-                    g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i),
+                    graph.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i),
                             modGet(warmupNodeAttrIds2, i), modGet(warmupNodeAttrs2, i));
                     break;
             }
@@ -75,39 +76,39 @@ public class MixPrimitive extends Benchmark {
         System.out.println("Measuring for " + MEASURE_N + " queries");
         for (int i = 0; i < MEASURE_N; i++) {
             if (i % 10000 == 0) {
-                g.restartTransaction();
+                graph.restartTransaction();
                 System.out.println("Measured for " + i + " queries");
             }
             randQuery = rand.nextInt(5);
             switch(randQuery) {
                 case 0:
                     start = System.nanoTime();
-                    List<Long> neighbors = g.getNeighbors(modGet(neighborIds, i));
+                    List<Long> neighbors = graph.getNeighbors(modGet(neighborIds, i));
                     end = System.nanoTime();
                     neighborOut.println(neighbors.size() + "," + (end - start) / (1000.0));
                     break;
                 case 1:
                     start = System.nanoTime();
-                    List<Long> neighborNodes = g.getNeighborNode(modGet(neighborNodeIds, i),
+                    List<Long> neighborNodes = graph.getNeighborNode(modGet(neighborNodeIds, i),
                             modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
                     end = System.nanoTime();
                     neighborNodeOut.println(neighborNodes.size() + "," + (end - start) / (1000.0));
                     break;
                 case 2:
                     start = System.nanoTime();
-                    List<Long> neighborAtypes = g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
+                    List<Long> neighborAtypes = graph.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
                     end = System.nanoTime();
                     neighborAtypeOut.println(neighborAtypes.size() + "," + (end - start) / 1000.0);
                     break;
                 case 3:
                     start = System.nanoTime();
-                    Set<Long> nodes = g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
+                    Set<Long> nodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
                     end = System.nanoTime();
                     nodeOut.println(nodes.size() + "," + (end - start) / 1000.0);
                     break;
                 case 4:
                     start = System.nanoTime();
-                    Set<Long> nodeNodes = g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
+                    Set<Long> nodeNodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
                             modGet(nodeAttrIds2, i), modGet(nodeAttrs2, i));
                     end = System.nanoTime();
                     nodeNodeOut.println(nodeNodes.size() + "," + (end - start) / 1000.0);
