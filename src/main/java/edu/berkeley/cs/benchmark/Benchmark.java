@@ -184,8 +184,8 @@ public abstract class Benchmark {
             overallResultThroughput += j.getResultThroughput();
             throughputOut.printf("Client %d\t%f\t%f\n", j.clientId, j.getQueryThroughput(), j.getResultThroughput());
         }
-        throughputOut.printf("Overall %s throughput\t%f\t%f\n",
-                benchClassName, overallQueryThroughput, overallResultThroughput);
+        throughputOut.printf("Overall %s throughput (%d clients)\t%f\t%f\n",
+                benchClassName, numClients, overallQueryThroughput, overallResultThroughput);
         throughputOut.close();
         printMemoryFootprint();
     }

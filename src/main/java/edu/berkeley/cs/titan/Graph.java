@@ -45,12 +45,14 @@ public class Graph {
             }
         }
 
-        txn = g.buildTransaction().start();
+        txn = g.newTransaction();
+//        txn = g.buildTransaction().start();
     }
 
     public void restartTransaction() {
         txn.commit();
-        txn = g.buildTransaction().start();
+//        txn = g.buildTransaction().start();
+        txn = g.newTransaction();
     }
 
     public List<Long> getNeighbors(long id) {
