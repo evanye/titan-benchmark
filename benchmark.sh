@@ -2,8 +2,8 @@
 set -e
 
 dataset=livejournal
-latency=T
-throughput=T
+latency=false
+throughput=true
 QUERY_DIR=/mnt/liveJournal-40attr16each-queries
 OUTPUT_DIR=/mnt/livejournal_output
 
@@ -32,26 +32,22 @@ export MAVEN_OPTS="-Xmx102400M"
 
 warmup=100000
 measure=100000
+numClients=( 16 21 64 128 256 512 )
 
-for test in "${tests[@]}"
-do
-  if [[ -n "$latency" ]]; then
+if [ "$latency" = true ]; then
+  for test in "${tests[@]}"; do
     sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
     mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
-      -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${warmup} ${measure}"
-  fi
+      -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} 1 ${warmup} ${measure}"
+  done
+fi
 
-  if [[ -n "$throughput" ]]; then
-    sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
-    mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
-      -Dexec.args="${test} throughput ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${warmup} ${measure}"
-  fi
-  #java -verbose:gc -Xmx${JVM_HEAP}m -cp ${classpath} \
-  #   edu.berkeley.cs.benchmark.BenchTao ${test} \
-  #   latency \
-  #   ${dataset} \
-  #   ${QUERY_DIR} \
-  #   ${OUTPUT_DIR} \
-  #   ${warmup} \
-  #   ${measure} \
-done
+if [[ "$throughput" = true ]]; then
+  for test in "${tests[@]}"; do
+    for numClient in "${numClients[@]}"; do
+      sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+      mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
+        -Dexec.args="${test} throughput ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${numClient} 0 0"
+    done
+  done
+fi
