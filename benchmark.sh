@@ -32,7 +32,7 @@ export MAVEN_OPTS="-Xmx102400M"
 
 warmup=100000
 measure=100000
-numClients=( 32 64 128 )
+numClients=( 4 8 16 32 64 128 )
 
 if [ "$latency" = true ]; then
   for test in "${tests[@]}"; do

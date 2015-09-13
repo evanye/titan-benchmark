@@ -1,6 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Assoc;
+import edu.berkeley.cs.titan.Graph;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -73,7 +74,7 @@ public class MixTao extends Benchmark {
         }
     }
 
-    int dispatchMixQueryWarmup(Random rand) {
+    int dispatchMixQueryWarmup(Graph g, Random rand) {
         int i;
         switch (chooseQuery(rand)) {
             case 0:
@@ -117,7 +118,7 @@ public class MixTao extends Benchmark {
         return 0;
     }
 
-    int dispatchMixQuery(Random rand) {
+    int dispatchMixQuery(Graph g, Random rand) {
         int i;
         switch (chooseQuery(rand)) {
             case 0:
@@ -179,7 +180,7 @@ public class MixTao extends Benchmark {
                 System.out.println("Warmed up for " + i + " queries");
             }
 
-            dispatchMixQueryWarmup(rand);
+            dispatchMixQueryWarmup(g, rand);
         }
 
         rand.setSeed(SEED); // re-seed
@@ -265,12 +266,12 @@ public class MixTao extends Benchmark {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                dispatchMixQueryWarmup(rand);
+                dispatchMixQueryWarmup(g, rand);
             }
 
             @Override
             public int query() {
-                return dispatchMixQuery(rand);
+                return dispatchMixQuery(g, rand);
             }
         };
     }
