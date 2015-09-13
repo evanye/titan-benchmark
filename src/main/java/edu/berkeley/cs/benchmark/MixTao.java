@@ -67,10 +67,10 @@ public class MixTao extends Benchmark {
             return 2;
         } else if (d < ASSOC_RANGE_PERC + OBJ_GET_PERC +
                 ASSOC_GET_PERC + ASSOC_COUNT_PERC) {
-
             return 3;
+        } else {
+            return 4;
         }
-        return 4;
     }
 
     int dispatchMixQueryWarmup(Random rand) {
@@ -261,12 +261,31 @@ public class MixTao extends Benchmark {
     }
 
     @Override
+    public RunThroughput getThroughputJob(int clientId) {
+        return new RunThroughput(clientId) {
+            @Override
+            public void warmupQuery() {
+                dispatchMixQueryWarmup(rand);
+            }
+
+            @Override
+            public int query() {
+                return dispatchMixQuery(rand);
+            }
+        };
+    }
+
+    /**
+     * These queries are not being used, since benchLatency is overriden.
+     */
+    @Override
     public int warmupQuery(int i) {
-        return dispatchMixQueryWarmup(rand);
+        return -1;
     }
 
     @Override
     public int query(int i) {
-        return dispatchMixQuery(rand);
+        return -1;
     }
+
 }

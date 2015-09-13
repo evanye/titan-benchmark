@@ -1,15 +1,11 @@
 package edu.berkeley.cs.benchmark;
 
-import edu.berkeley.cs.titan.Graph;
-
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 public class MixPrimitive extends Benchmark {
-    private static final long SEED = 1618L;
 
     @Override
     public void readQueries() {
@@ -126,167 +122,88 @@ public class MixPrimitive extends Benchmark {
     }
 
     @Override
-    public void benchThroughput(int numClients) {
-        PrintWriter throughputOut = makeFileWriter("throughput.csv", true);
-        System.out.println("Titan mix query throughput with " + numClients + " clients.");
-
-        List<RunMixThroughput> jobs = new ArrayList<>(numClients);
-        List<Thread> clients = new ArrayList<>(numClients);
-        for (int i = 0; i < numClients; i++) {
-            jobs.add(new RunMixThroughput(i));
-            clients.add(new Thread(jobs.get(i)));
-        }
-        for (Thread thread : clients) {
-            thread.start();
-        }
-        try {
-            for (Thread thread : clients) {
-                thread.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        double overallQueryThroughput = 0, overallResultThroughput = 0;
-        for (RunMixThroughput j: jobs) {
-            overallQueryThroughput += j.queryThroughput;
-            overallResultThroughput += j.resultThroughput;
-            throughputOut.printf("Client %d\t%f\t%f\n", j.clientId, j.queryThroughput, j.resultThroughput);
-        }
-        throughputOut.printf("Overall\t%f\t%f\n", overallQueryThroughput, overallResultThroughput);
-        throughputOut.close();
-        printMemoryFootprint();
-        System.exit(0);
-    }
-
-    class RunMixThroughput implements Runnable {
-        int clientId;
-        private Random rand;
-        private Graph g;
-        // holds the results of the benchmarking
-        volatile double queryThroughput;
-        volatile double resultThroughput;
-
-        public RunMixThroughput(int clientId) {
-            this.clientId = clientId;
-            rand = new Random(SEED + clientId);
-            g = new Graph();
-        }
-
-        private void runWarmup() {
-            int randQuery = rand.nextInt(5), queryIdx;
-            switch (randQuery) {
-                case 0:
-                    queryIdx = rand.nextInt(warmupNeighborIds.size());
-                    g.getNeighbors(modGet(warmupNeighborIds, queryIdx));
-                    break;
-                case 1:
-                    queryIdx = rand.nextInt(warmupNeighborNodeIds.size());
-                    g.getNeighborNode(
-                            modGet(warmupNeighborNodeIds, queryIdx),
-                            modGet(warmupNeighborNodeAttrIds, queryIdx),
-                            modGet(warmupNeighborNodeAttrs, queryIdx));
-                    break;
-                case 2:
-                    queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
-                    g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
-                            modGet(warmupNodeAttrs1, queryIdx));
-                    break;
-                case 3:
-                    queryIdx = rand.nextInt(warmupNeighborAtypeIds.size());
-                    g.getNeighborAtype(modGet(warmupNeighborAtypeIds, queryIdx),
-                                       modGet(warmupNeighborAtype, queryIdx));
-                    break;
-                case 4:
-                    queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
-                    g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
-                            modGet(warmupNodeAttrs1, queryIdx),
-                            modGet(warmupNodeAttrIds2, queryIdx),
-                            modGet(warmupNodeAttrs2, queryIdx));
-                    break;
-            }
-        }
-
-        @Override
-        public void run() {
-            int randQuery;
-            // warmup
-            int i = 0, queryIdx;
-            long warmupStart = System.nanoTime();
-            System.out.println("Client " + clientId + " warming up for " + (WARMUP_TIME / 1E9) + " seconds.");
-            while (System.nanoTime() - warmupStart < WARMUP_TIME) {
-                if (i % 10000 == 0) {
-                    g.restartTransaction();
+    public RunThroughput getThroughputJob(int clientId) {
+        return new RunThroughput(clientId) {
+            @Override
+            public void warmupQuery() {
+                int randQuery = rand.nextInt(5), queryIdx;
+                switch (randQuery) {
+                    case 0:
+                        queryIdx = rand.nextInt(warmupNeighborIds.size());
+                        g.getNeighbors(modGet(warmupNeighborIds, queryIdx));
+                        break;
+                    case 1:
+                        queryIdx = rand.nextInt(warmupNeighborNodeIds.size());
+                        g.getNeighborNode(
+                                modGet(warmupNeighborNodeIds, queryIdx),
+                                modGet(warmupNeighborNodeAttrIds, queryIdx),
+                                modGet(warmupNeighborNodeAttrs, queryIdx));
+                        break;
+                    case 2:
+                        queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
+                        g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
+                                modGet(warmupNodeAttrs1, queryIdx));
+                        break;
+                    case 3:
+                        queryIdx = rand.nextInt(warmupNeighborAtypeIds.size());
+                        g.getNeighborAtype(modGet(warmupNeighborAtypeIds, queryIdx),
+                                modGet(warmupNeighborAtype, queryIdx));
+                        break;
+                    case 4:
+                        queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
+                        g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
+                                modGet(warmupNodeAttrs1, queryIdx),
+                                modGet(warmupNodeAttrIds2, queryIdx),
+                                modGet(warmupNodeAttrs2, queryIdx));
+                        break;
                 }
-                runWarmup();
             }
-            System.out.println("Client " + clientId + " finished warming up!");
 
-            // measure
-            i = 0;
-            long results = 0;
-            System.out.println("Client " + clientId + " measuring for " + (MEASURE_TIME / 1E9) + " seconds.");
-            long start = System.nanoTime();
-            while (System.nanoTime() - start < MEASURE_TIME) {
-                if (i % 10000 == 0) {
-                    g.restartTransaction();
-                }
-
-                randQuery = rand.nextInt(5);
+            @Override
+            public int query() {
+                int queryIdx;
+                int randQuery = rand.nextInt(5);
                 switch (randQuery) {
                     case 0:
                         // get_nhbrs(n)
                         queryIdx = rand.nextInt(neighborIds.size());
-                        results += g.getNeighbors(modGet(neighborIds, queryIdx)).size();
-                        break;
+                        return g.getNeighbors(modGet(neighborIds, queryIdx)).size();
                     case 1:
                         // get_nhbrs(n, attr)
                         queryIdx = rand.nextInt(neighborNodeIds.size());
-                        results += g.getNeighborNode(
+                        return g.getNeighborNode(
                                 modGet(neighborNodeIds, queryIdx),
                                 modGet(neighborNodeAttrIds, queryIdx),
                                 modGet(neighborNodeAttrs, queryIdx)).size();
-                        break;
                     case 2:
                         // get_nodes(attr)
                         queryIdx = rand.nextInt(nodeAttrIds1.size());
-                        results += g.getNodes(
+                        return g.getNodes(
                                 modGet(nodeAttrIds1, queryIdx),
                                 modGet(nodeAttrs1, queryIdx)).size();
-                        break;
                     case 3:
                         // get_nhbrs(n, atype)
                         queryIdx = rand.nextInt(neighborAtype.size());
-                        results += g.getNeighborAtype(
+                        return g.getNeighborAtype(
                                 modGet(neighborAtypeIds, queryIdx),
                                 modGet(neighborAtype, queryIdx)).size();
-                        break;
                     case 4:
                         // get_nodes(attr1, attr2)
                         queryIdx = rand.nextInt(nodeAttrIds1.size());
-                        results += g.getNodes(
+                        return g.getNodes(
                                 modGet(nodeAttrIds1, queryIdx),
                                 modGet(nodeAttrs1, queryIdx),
                                 modGet(nodeAttrIds2, queryIdx),
                                 modGet(nodeAttrs2, queryIdx)).size();
-                        break;
                 }
-                ++i;
+                return Integer.MIN_VALUE;
             }
-            long end = System.nanoTime();
-            System.out.println("Client " + clientId + " finished measuring!");
-            double totalSeconds = (end - start) * 1. / 1e9;
-            queryThroughput = ((double) i) / totalSeconds;
-            resultThroughput = ((double) results ) / totalSeconds;
-
-            System.out.println("Client " + clientId + " cooling down for " + (COOLDOWN_TIME / 1E9) + " seconds.");
-            long cooldownStart = System.nanoTime();
-            while (System.nanoTime() - cooldownStart < COOLDOWN_TIME) {
-                runWarmup();
-            }
-            System.out.println("Client " + clientId + " finished cooling down!");
-        }
+        };
     }
+
+    /**
+     * These queries are not being used, since benchLatency is overriden.
+     */
 
     @Override
     public int warmupQuery(int i) {

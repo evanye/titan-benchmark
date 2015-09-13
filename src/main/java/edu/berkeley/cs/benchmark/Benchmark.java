@@ -7,16 +7,13 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class Benchmark {
+    public static final long SEED = 1618L;
 
     public static int WARMUP_N;
     public static int MEASURE_N;
 
-    public static final long WARMUP_TIME = (long) (60 * 1e9); // 60 seconds
-    public static final long MEASURE_TIME = (long) (120 * 1e9);
-    public static final long COOLDOWN_TIME = (long) (30 * 1e9);
-
     Graph g;
-    String name;
+    static String name;
     static String queryPath;
     static String outputPath;
     static String benchClassName;
@@ -98,7 +95,7 @@ public abstract class Benchmark {
     public static void main(String[] args) throws Exception {
         benchClassName = args[0];
         String latencyOrThroughput = args[1];
-        String name = args[2];
+        name = args[2];
         queryPath = args[3];
         outputPath = args[4];
         int numClients = Integer.parseInt(args[5]);
@@ -107,7 +104,6 @@ public abstract class Benchmark {
 
         String fullClassName = Benchmark.class.getPackage().getName() + "." + benchClassName;
         Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
-        b.init(name);
         b.readQueries();
         if ("latency".equals(latencyOrThroughput)) {
             b.benchLatency();
@@ -119,16 +115,22 @@ public abstract class Benchmark {
         System.exit(0);
     }
 
-    public void init(String name) {
-        this.name = name;
-        g = new Graph();
-    }
-
     public abstract void readQueries();
     public abstract int warmupQuery(int i);
     public abstract int query(int i);
 
+    /**
+     * Returns a throughput job that computes query throughput.
+     * Override this in classes where you want to bench the throughput
+     * @param clientId
+     * @return a class that extends RunThroughput impleemnting the query methods
+     */
+    public RunThroughput getThroughputJob(int clientId) {
+        return null;
+    }
+
     public void benchLatency() {
+        g = new Graph();
         PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
@@ -158,35 +160,33 @@ public abstract class Benchmark {
 
     public void benchThroughput(int numClients) {
         PrintWriter throughputOut = makeFileWriter("throughput.csv", true);
-        System.out.println("Titan " + benchClassName + " query throughput");
-        System.out.println("Warming up for " + WARMUP_TIME / 1E9 + " seconds");
-        int i = 0;
-        long warmupStart = System.nanoTime();
-        while (System.nanoTime() - warmupStart < WARMUP_TIME) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-                System.out.println("Warmed up for " + i + " queries");
+        System.out.println("Titan " + benchClassName + " query throughput with " + numClients + " clients.");
+
+        List<RunThroughput> jobs = new ArrayList<>(numClients);
+        List<Thread> clients = new ArrayList<>(numClients);
+        for (int i = 0; i < numClients; i++) {
+            jobs.add(getThroughputJob(i));
+            clients.add(new Thread(jobs.get(i)));
+        }
+        for (Thread thread : clients) {
+            thread.start();
+        }
+        try {
+            for (Thread thread : clients) {
+                thread.join();
             }
-            int numResults = warmupQuery(i);
-            ++i;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        System.out.println("Measuring for " + MEASURE_TIME/ 1E9 + " seconds");
-
-        i = 0;
-        long numResults = 0;
-        long start = System.nanoTime();
-        while (System.nanoTime() - start < MEASURE_TIME) {
-            if (i % 10000 == 0) {
-                g.restartTransaction();
-            }
-            numResults += query(i);
-            ++i;
+        double overallQueryThroughput = 0, overallResultThroughput = 0;
+        for (RunThroughput j: jobs) {
+            overallQueryThroughput += j.getQueryThroughput();
+            overallResultThroughput += j.getResultThroughput();
+            throughputOut.printf("Client %d\t%f\t%f\n", j.clientId, j.getQueryThroughput(), j.getResultThroughput());
         }
-        double totalSeconds = (System.nanoTime() - start) * 1. / 1e9;
-        double queryThroughput = ((double) i) / totalSeconds;
-        double resultThroughput = ((double) numResults) / totalSeconds;
-        throughputOut.println(benchClassName + " throughput - qps: " + queryThroughput + " results/second: " + resultThroughput);
+        throughputOut.printf("Overall %s throughput\t%f\t%f\n",
+                benchClassName, overallQueryThroughput, overallResultThroughput);
         throughputOut.close();
         printMemoryFootprint();
     }
