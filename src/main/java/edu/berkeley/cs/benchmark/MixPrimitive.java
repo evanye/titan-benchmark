@@ -205,7 +205,7 @@ public class MixPrimitive extends Benchmark {
                 }
                 runWarmup();
             }
-            System.out.printf("Client " + clientId + " finished warming up!");
+            System.out.println("Client " + clientId + " finished warming up!");
 
             // measure
             i = 0;
@@ -264,7 +264,7 @@ public class MixPrimitive extends Benchmark {
             double queryThput = ((double) i) / totalSeconds;
             double resultsThput = ((double) results ) / totalSeconds;
 
-            throughputOut.printf("%s,%d,%d\n", "Client " + clientId, queryThput, resultsThput);
+            throughputOut.printf("%s,%f,%f\n", "Client " + clientId, queryThput, resultsThput);
 
             System.out.println("Client " + clientId + " cooling down for " + (COOLDOWN_TIME / 1E9) + " seconds.");
             long cooldownStart = System.nanoTime();
