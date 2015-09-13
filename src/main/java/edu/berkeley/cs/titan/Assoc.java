@@ -9,15 +9,6 @@ public class Assoc implements Comparable<Assoc> {
     public long timestamp;
     public String prop; // For now assumes one edge attribute
 
-    public Assoc(long srcId, long dstId, long atype, long timestamp, String prop) {
-
-        this.srcId = srcId;
-        this.dstId = dstId;
-        this.atype = atype;
-        this.timestamp = timestamp;
-        this.prop = prop;
-    }
-
     public Assoc(TitanEdge edge) {
         this.srcId = TitanId.fromVertexID(edge.getVertex(Direction.OUT));
         this.dstId = TitanId.fromVertexID(edge.getVertex(Direction.IN));

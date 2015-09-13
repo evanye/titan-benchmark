@@ -80,7 +80,7 @@ public class Load {
         int numProperty = conf.getInt("property.total");
         String nodeFile = conf.getString("data.node");
         String edgeFile = conf.getString("data.edge");
-        System.out.printf("nodeFile %s, edgeFile %s, propertySize %d", nodeFile, edgeFile, propertySize);
+        System.out.printf("nodeFile %s, edgeFile %s, propertySize %d\n", nodeFile, edgeFile, propertySize);
 
         long c = 1L;
         try (BufferedReader br = new BufferedReader(new FileReader(nodeFile))) {

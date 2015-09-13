@@ -236,9 +236,7 @@ public abstract class Benchmark {
         }
     }
 
-    static void getLongInteger(
-            String file, List<Long> nodeIds, List<Integer> atypes) {
-
+    static void getLongInteger(String file, List<Long> nodeIds, List<Integer> atypes) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
             String line = br.readLine();
