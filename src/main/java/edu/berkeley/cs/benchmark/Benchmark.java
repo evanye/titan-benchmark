@@ -13,7 +13,7 @@ public abstract class Benchmark {
 
     public static final long WARMUP_TIME = (long) (60 * 1e9); // 60 seconds
     public static final long MEASURE_TIME = (long) (120 * 1e9);
-    public static final long COOLDOWN_TIME = (long) (15 * 1e9);
+    public static final long COOLDOWN_TIME = (long) (30 * 1e9);
 
     Graph g;
     String name;

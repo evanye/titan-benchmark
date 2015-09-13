@@ -156,6 +156,7 @@ public class MixPrimitive extends Benchmark {
         throughputOut.printf("Overall\t%f\t%f\n", overallQueryThroughput, overallResultThroughput);
         throughputOut.close();
         printMemoryFootprint();
+        System.exit(0);
     }
 
     class RunMixThroughput implements Runnable {
