@@ -32,7 +32,7 @@ public class NeighborAtype extends Benchmark {
 
             @Override
             public int query() {
-                int idx = rand.nextInt(neighborIds.size());
+                int idx = rand.nextInt(neighborAtypeIds.size());
                 return NeighborAtype.this.query(g, idx);
             }
         };

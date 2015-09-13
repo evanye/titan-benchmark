@@ -1,6 +1,7 @@
 package edu.berkeley.cs.titan;
 
 import com.thinkaurelius.titan.core.*;
+
 import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -44,16 +45,16 @@ public class Graph {
             }
         }
 
-        txn = g.buildTransaction().readOnly().start();
+        txn = g.buildTransaction().start();
     }
 
     public void restartTransaction() {
         txn.commit();
-        txn = g.buildTransaction().readOnly().start();
+        txn = g.buildTransaction().start();
     }
 
     public List<Long> getNeighbors(long id) {
-        List<Long> neighbors = new LinkedList<>();
+        List<Long> neighbors = new ArrayList<>();
         TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             neighbors.add(TitanId.fromVertexID(edge.getOtherVertex(node)));
@@ -78,7 +79,7 @@ public class Graph {
     }
 
     public List<Long> getNeighborNode(long id, int propIdx, String search) {
-        List<Long> result = new LinkedList<>();
+        List<Long> result = new ArrayList<>();
         TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             TitanVertex neighbor = edge.getOtherVertex(node);
@@ -100,7 +101,7 @@ public class Graph {
         }
         Collections.sort(neighbors);
 
-        List<Long> result = new LinkedList<>();
+        List<Long> result = new ArrayList<>();
         for (TimestampedId neighbor: neighbors) {
             result.add(neighbor.id);
         }
