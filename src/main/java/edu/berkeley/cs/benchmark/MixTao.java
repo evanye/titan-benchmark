@@ -163,11 +163,11 @@ public class MixTao extends Benchmark {
 
     @Override
     public void benchLatency() {
-        PrintWriter assocRangeOut = makeFileWriter(g.getName() + "_mix_AssocRange.csv");
-        PrintWriter objGetOut = makeFileWriter(g.getName() + "_mix_ObjGet.csv");
-        PrintWriter assocGetOut = makeFileWriter(g.getName() + "_mix_AssocGet.csv");
-        PrintWriter assocCountOut = makeFileWriter(g.getName() + "_mix_AssocCount.csv");
-        PrintWriter assocTimeRangeOut = makeFileWriter(g.getName() + "_mix_AssocTimeRange.csv");
+        PrintWriter assocRangeOut = makeFileWriter(name + "_mix_AssocRange.csv");
+        PrintWriter objGetOut = makeFileWriter(name + "_mix_ObjGet.csv");
+        PrintWriter assocGetOut = makeFileWriter(name + "_mix_AssocGet.csv");
+        PrintWriter assocCountOut = makeFileWriter(name + "_mix_AssocCount.csv");
+        PrintWriter assocTimeRangeOut = makeFileWriter(name + "_mix_AssocTimeRange.csv");
 
         Random rand = new Random(SEED);
 

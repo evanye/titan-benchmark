@@ -13,37 +13,38 @@ import java.net.URL;
 import java.util.*;
 
 public class Graph {
-    final String name;
-    final TitanGraph g;
     private TitanTransaction txn;
-    private int numAtypes;
-    private int numProperties;
+
+    // TitanGraph is static so is shared among multiple instances of Graph
+    private static TitanGraph g = null;
+    private static int numAtypes;
+    private static int numProperties;
     private static EdgeLabel[] intToAtype;
 
-    public Graph(final String name) {
-        this.name = name;
-        URL props = getClass().getResource("/titan-cassandra.properties");
-        URL configUrl = getClass().getResource("/benchmark.properties");
+    public Graph() {
+        if (g == null) {
+            URL props = getClass().getResource("/titan-cassandra.properties");
+            URL configUrl = getClass().getResource("/benchmark.properties");
 
-        Configuration titanConfiguration = null, config = null;
-        try {
-            config = new PropertiesConfiguration(configUrl);
-            titanConfiguration = new PropertiesConfiguration(props) {{
-                setProperty("storage.cassandra.keyspace", name);
-            }};
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
+            Configuration titanConfiguration = null, config = null;
+            try {
+                config = new PropertiesConfiguration(configUrl);
+                titanConfiguration = new PropertiesConfiguration(props);
+                titanConfiguration.setProperty("storage.cassandra.keyspace", config.getString("name"));
+            } catch (ConfigurationException e) {
+                e.printStackTrace();
+            }
+            g = TitanFactory.open(titanConfiguration);
+
+            numAtypes = config.getInt("atype.total");
+            numProperties = config.getInt("property.total");
+            intToAtype = new EdgeLabel[numAtypes];
+            for (int i = 0; i < numAtypes; i++) {
+                intToAtype[i] = g.getEdgeLabel(String.valueOf(i));
+            }
         }
 
-        g = TitanFactory.open(titanConfiguration);
         txn = g.buildTransaction().readOnly().start();
-
-        numAtypes = config.getInt("atype.total");
-        numProperties = config.getInt("property.total");
-        intToAtype = new EdgeLabel[numAtypes];
-        for (int i = 0; i < numAtypes; i++) {
-            intToAtype[i] = g.getEdgeLabel(String.valueOf(i));
-        }
     }
 
     public void restartTransaction() {
@@ -203,16 +204,12 @@ public class Graph {
         restartTransaction();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void shutdown() {
-        g.shutdown();
-    }
-
     private TitanVertex getNode(long id) {
         return txn.getVertex(TitanId.toVertexId(id));
+    }
+
+    public static void shutdown() {
+        g.shutdown();
     }
 
     static class TimestampedId implements Comparable<TimestampedId> {

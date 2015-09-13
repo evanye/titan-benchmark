@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +32,11 @@ public class MixPrimitive extends Benchmark {
 
     @Override
     public void benchLatency() {
-        PrintWriter neighborOut = makeFileWriter(g.getName() + "_mix_Neighbor.csv");
-        PrintWriter neighborNodeOut = makeFileWriter(g.getName() + "_mix_NeighborNode.csv");
-        PrintWriter neighborAtypeOut = makeFileWriter(g.getName() + "_mix_NeighborAtype.csv");
-        PrintWriter nodeOut = makeFileWriter(g.getName() + "_mix_Node.csv");
-        PrintWriter nodeNodeOut = makeFileWriter(g.getName() + "_mix_NodeNode.csv");
+        PrintWriter neighborOut = makeFileWriter(name + "_mix_Neighbor.csv");
+        PrintWriter neighborNodeOut = makeFileWriter(name + "_mix_NeighborNode.csv");
+        PrintWriter neighborAtypeOut = makeFileWriter(name + "_mix_NeighborAtype.csv");
+        PrintWriter nodeOut = makeFileWriter(name + "_mix_Node.csv");
+        PrintWriter nodeNodeOut = makeFileWriter(name + "_mix_NodeNode.csv");
 
         int randQuery;
         Random rand = new Random(SEED);
@@ -148,10 +150,12 @@ public class MixPrimitive extends Benchmark {
     class RunMixThroughput implements Runnable {
         private int clientId;
         private Random rand;
+        private Graph g;
 
         public RunMixThroughput(int clientId) {
             this.clientId = clientId;
             rand = new Random(SEED + clientId);
+            g = new Graph();
         }
 
         private void runWarmup() {

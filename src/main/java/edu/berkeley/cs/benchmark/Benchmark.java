@@ -16,6 +16,7 @@ public abstract class Benchmark {
     public static final long COOLDOWN_TIME = (long) (30 * 1e9);
 
     Graph g;
+    String name;
     static String queryPath;
     static String outputPath;
     static String benchClassName;
@@ -119,11 +120,12 @@ public abstract class Benchmark {
         System.exit(0);
     }
 
-    public void init(String titanName) {
-        g = new Graph(titanName);
+    public void init(String name) {
+        this.name = name;
+        g = new Graph();
         try {
             throughputOut = new PrintWriter(new FileWriter(
-                    Paths.get(outputPath, g.getName() + "_throughput.csv").toFile(), true));
+                    Paths.get(outputPath, name + "_throughput.csv").toFile(), true));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -134,7 +136,7 @@ public abstract class Benchmark {
     public abstract int query(int i);
 
     public void benchLatency() {
-        PrintWriter out = makeFileWriter(g.getName() + "_" + benchClassName + ".csv");
+        PrintWriter out = makeFileWriter(name + "_" + benchClassName + ".csv");
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
