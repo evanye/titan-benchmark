@@ -74,94 +74,6 @@ public class MixTao extends Benchmark {
         }
     }
 
-    int dispatchMixQueryWarmup(Graph g, Random rand) {
-        int i;
-        switch (chooseQuery(rand)) {
-            case 0:
-                // assoc_range
-                i = rand.nextInt(warmupAssocRangeNodes.size());
-                return g.assocRange(
-                        modGet(warmupAssocRangeNodes, i),
-                        modGet(warmupAssocRangeAtypes, i),
-                        modGet(warmupAssocRangeOffsets, i),
-                        modGet(warmupAssocRangeLengths, i)).size();
-            case 1:
-                // obj_get
-                i = rand.nextInt(warmupObjGetIds.size());
-                return g.objGet(modGet(warmupObjGetIds, i)).size();
-            case 2:
-                // assoc_get
-                i = rand.nextInt(warmupAssocCountNodes.size());
-                return g.assocGet(
-                        modGet(warmupAssocGetNodes, i),
-                        modGet(warmupAssocGetAtypes, i),
-                        modGet(warmupAssocGetDstIdSets, i),
-                        modGet(warmupAssocGetTimeLows, i),
-                        modGet(warmupAssocGetTimeHighs, i)).size();
-            case 3:
-                // assoc_count
-                i = rand.nextInt(warmupAssocCountNodes.size());
-                g.assocCount(
-                        modGet(warmupAssocCountNodes, i),
-                        modGet(warmupAssocCountAtypes, i));
-                return 1;
-            case 4:
-                // assoc_time_range
-                i = rand.nextInt(warmupAssocTimeRangeNodes.size());
-                return g.assocTimeRange(
-                        modGet(warmupAssocTimeRangeNodes, i),
-                        modGet(warmupAssocTimeRangeAtypes, i),
-                        modGet(warmupAssocTimeRangeTimeLows, i),
-                        modGet(warmupAssocTimeRangeTimeHighs, i),
-                        modGet(warmupAssocTimeRangeLimits, i)).size();
-        }
-        return 0;
-    }
-
-    int dispatchMixQuery(Graph g, Random rand) {
-        int i;
-        switch (chooseQuery(rand)) {
-            case 0:
-                // assoc_range
-                i = rand.nextInt(assocRangeNodes.size());
-                return g.assocRange(
-                        modGet(assocRangeNodes, i),
-                        modGet(assocRangeAtypes, i),
-                        modGet(assocRangeOffsets, i),
-                        modGet(assocRangeLengths, i)).size();
-            case 1:
-                // obj_get
-                i = rand.nextInt(objGetIds.size());
-                return g.objGet(modGet(objGetIds, i)).size();
-            case 2:
-                // assoc_get
-                i = rand.nextInt(assocGetNodes.size());
-                return g.assocGet(
-                        modGet(assocGetNodes, i),
-                        modGet(assocGetAtypes, i),
-                        modGet(assocGetDstIdSets, i),
-                        modGet(assocGetTimeLows, i),
-                        modGet(assocGetTimeHighs, i)).size();
-            case 3:
-                // assoc_count
-                i = rand.nextInt(assocCountNodes.size());
-                g.assocCount(
-                        modGet(assocCountNodes, i),
-                        modGet(assocCountAtypes, i));
-                return 1;
-            case 4:
-                // assoc_time_range
-                i = rand.nextInt(assocTimeRangeNodes.size());
-                return g.assocTimeRange(
-                        modGet(assocTimeRangeNodes, i),
-                        modGet(assocTimeRangeAtypes, i),
-                        modGet(assocTimeRangeTimeLows, i),
-                        modGet(assocTimeRangeTimeHighs, i),
-                        modGet(assocTimeRangeLimits, i)).size();
-        }
-        return 0;
-    }
-
     @Override
     public void benchLatency() {
         PrintWriter assocRangeOut = makeFileWriter("mix_AssocRange.csv", false);
@@ -180,7 +92,41 @@ public class MixTao extends Benchmark {
                 System.out.println("Warmed up for " + i + " queries");
             }
 
-            dispatchMixQueryWarmup(g, rand);
+            switch (chooseQuery(rand)) {
+                case 0:
+                    // assoc_range
+                    g.assocRange(
+                            modGet(warmupAssocRangeNodes, i),
+                            modGet(warmupAssocRangeAtypes, i),
+                            modGet(warmupAssocRangeOffsets, i),
+                            modGet(warmupAssocRangeLengths, i)).size();
+                case 1:
+                    // obj_get
+                    g.objGet(modGet(warmupObjGetIds, i)).size();
+                case 2:
+                    // assoc_get
+                    g.assocGet(
+                            modGet(warmupAssocGetNodes, i),
+                            modGet(warmupAssocGetAtypes, i),
+                            modGet(warmupAssocGetDstIdSets, i),
+                            modGet(warmupAssocGetTimeLows, i),
+                            modGet(warmupAssocGetTimeHighs, i)).size();
+                case 3:
+                    // assoc_count
+                    i = rand.nextInt(warmupAssocCountNodes.size());
+                    g.assocCount(
+                            modGet(warmupAssocCountNodes, i),
+                            modGet(warmupAssocCountAtypes, i));
+                case 4:
+                    // assoc_time_range
+                    i = rand.nextInt(warmupAssocTimeRangeNodes.size());
+                    g.assocTimeRange(
+                            modGet(warmupAssocTimeRangeNodes, i),
+                            modGet(warmupAssocTimeRangeAtypes, i),
+                            modGet(warmupAssocTimeRangeTimeLows, i),
+                            modGet(warmupAssocTimeRangeTimeHighs, i),
+                            modGet(warmupAssocTimeRangeLimits, i)).size();
+            }
         }
 
         rand.setSeed(SEED); // re-seed
@@ -266,12 +212,90 @@ public class MixTao extends Benchmark {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                dispatchMixQueryWarmup(g, rand);
+                int i;
+                switch (chooseQuery(rand)) {
+                    case 0:
+                        // assoc_range
+                        i = rand.nextInt(warmupAssocRangeNodes.size());
+                        g.assocRange(
+                                modGet(warmupAssocRangeNodes, i),
+                                modGet(warmupAssocRangeAtypes, i),
+                                modGet(warmupAssocRangeOffsets, i),
+                                modGet(warmupAssocRangeLengths, i)).size();
+                    case 1:
+                        // obj_get
+                        i = rand.nextInt(warmupObjGetIds.size());
+                        g.objGet(modGet(warmupObjGetIds, i)).size();
+                    case 2:
+                        // assoc_get
+                        i = rand.nextInt(warmupAssocCountNodes.size());
+                        g.assocGet(
+                                modGet(warmupAssocGetNodes, i),
+                                modGet(warmupAssocGetAtypes, i),
+                                modGet(warmupAssocGetDstIdSets, i),
+                                modGet(warmupAssocGetTimeLows, i),
+                                modGet(warmupAssocGetTimeHighs, i)).size();
+                    case 3:
+                        // assoc_count
+                        i = rand.nextInt(warmupAssocCountNodes.size());
+                        g.assocCount(
+                                modGet(warmupAssocCountNodes, i),
+                                modGet(warmupAssocCountAtypes, i));
+                    case 4:
+                        // assoc_time_range
+                        i = rand.nextInt(warmupAssocTimeRangeNodes.size());
+                        g.assocTimeRange(
+                                modGet(warmupAssocTimeRangeNodes, i),
+                                modGet(warmupAssocTimeRangeAtypes, i),
+                                modGet(warmupAssocTimeRangeTimeLows, i),
+                                modGet(warmupAssocTimeRangeTimeHighs, i),
+                                modGet(warmupAssocTimeRangeLimits, i)).size();
+                }
             }
 
             @Override
             public int query() {
-                return dispatchMixQuery(g, rand);
+                int i;
+                switch (chooseQuery(rand)) {
+                    case 0:
+                        // assoc_range
+                        i = rand.nextInt(assocRangeNodes.size());
+                        return g.assocRange(
+                                modGet(assocRangeNodes, i),
+                                modGet(assocRangeAtypes, i),
+                                modGet(assocRangeOffsets, i),
+                                modGet(assocRangeLengths, i)).size();
+                    case 1:
+                        // obj_get
+                        i = rand.nextInt(objGetIds.size());
+                        return g.objGet(modGet(objGetIds, i)).size();
+                    case 2:
+                        // assoc_get
+                        i = rand.nextInt(assocGetNodes.size());
+                        return g.assocGet(
+                                modGet(assocGetNodes, i),
+                                modGet(assocGetAtypes, i),
+                                modGet(assocGetDstIdSets, i),
+                                modGet(assocGetTimeLows, i),
+                                modGet(assocGetTimeHighs, i)).size();
+                    case 3:
+                        // assoc_count
+                        i = rand.nextInt(assocCountNodes.size());
+                        g.assocCount(
+                                modGet(assocCountNodes, i),
+                                modGet(assocCountAtypes, i));
+                        return 1;
+                    case 4:
+                        // assoc_time_range
+                        i = rand.nextInt(assocTimeRangeNodes.size());
+                        return g.assocTimeRange(
+                                modGet(assocTimeRangeNodes, i),
+                                modGet(assocTimeRangeAtypes, i),
+                                modGet(assocTimeRangeTimeLows, i),
+                                modGet(assocTimeRangeTimeHighs, i),
+                                modGet(assocTimeRangeLimits, i)).size();
+                }
+                return 0;
             }
         };
     }
@@ -280,12 +304,12 @@ public class MixTao extends Benchmark {
      * These queries are not being used, since benchLatency is overriden.
      */
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return -1;
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return -1;
     }
 

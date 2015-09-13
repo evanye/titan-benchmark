@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
@@ -206,12 +208,12 @@ public class MixPrimitive extends Benchmark {
      */
 
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return -1;
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return -1;
     }
 

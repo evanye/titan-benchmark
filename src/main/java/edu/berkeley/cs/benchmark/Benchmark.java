@@ -116,8 +116,8 @@ public abstract class Benchmark {
     }
 
     public abstract void readQueries();
-    public abstract int warmupQuery(int i);
-    public abstract int query(int i);
+    public abstract int warmupQuery(Graph g, int i);
+    public abstract int query(Graph g, int i);
 
     /**
      * Returns a throughput job that computes query throughput.
@@ -139,7 +139,7 @@ public abstract class Benchmark {
                 g.restartTransaction();
                 System.out.println("Warmed up for " + i + " queries");
             }
-            warmupQuery(i);
+            warmupQuery(g, i);
         }
 
         System.out.println("Measuring for " + MEASURE_N + " queries");
@@ -149,7 +149,7 @@ public abstract class Benchmark {
                 System.out.println("Measured for " + i + " queries");
             }
             long start = System.nanoTime();
-            int numResults = query(i);
+            int numResults = query(g, i);
             long end = System.nanoTime();
             double microsecs = (end - start) / ((double) 1000);
             out.println(numResults + "," + microsecs);

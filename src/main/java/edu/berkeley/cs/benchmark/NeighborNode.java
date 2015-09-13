@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -16,15 +18,31 @@ public class NeighborNode extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
                 modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i)).size();
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return g.getNeighborNode(modGet(neighborNodeIds, i),
                 modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i)).size();
+    }
+
+    @Override
+    public RunThroughput getThroughputJob(int clientId) {
+        return new RunThroughput(clientId) {
+            @Override
+            public void warmupQuery() {
+                NeighborNode.this.warmupQuery(g, rand.nextInt(warmupNeighborNodeIds.size()));
+            }
+
+            @Override
+            public int query() {
+                int idx = rand.nextInt(neighborNodeIds.size());
+                return NeighborNode.this.query(g, idx);
+            }
+        };
     }
 
     static void getNeighborNodeQueries(

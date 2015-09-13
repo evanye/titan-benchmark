@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,7 +25,7 @@ public class AssocTimeRange extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return g.assocTimeRange(
                 modGet(warmupAssocTimeRangeNodes, i),
                 modGet(warmupAssocTimeRangeAtypes, i),
@@ -33,7 +35,7 @@ public class AssocTimeRange extends Benchmark {
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return g.assocTimeRange(
                 modGet(assocTimeRangeNodes, i),
                 modGet(assocTimeRangeAtypes, i),

@@ -29,9 +29,8 @@ public abstract class RunThroughput implements Runnable {
 
     @Override
     public void run() {
-        int randQuery;
         // warmup
-        int i = 0, queryIdx;
+        int i = 0;
         long warmupStart = System.nanoTime();
         System.out.println("Client " + clientId + " warming up for " + (WARMUP_TIME / 1E9) + " seconds.");
         while (System.nanoTime() - warmupStart < WARMUP_TIME) {

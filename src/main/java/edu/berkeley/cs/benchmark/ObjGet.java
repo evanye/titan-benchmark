@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 public class ObjGet extends Benchmark {
     public static final String WARMUP_FILE = "objGet_warmup.txt";
     public static final String QUERY_FILE = "objGet_query.txt";
@@ -11,12 +13,12 @@ public class ObjGet extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return g.objGet(modGet(warmupObjGetIds, i)).size();
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return g.objGet(modGet(objGetIds, i)).size();
     }
 }

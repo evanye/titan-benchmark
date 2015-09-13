@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -24,7 +26,7 @@ public class AssocGet extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(int i) {
+    public int warmupQuery(Graph g, int i) {
         return g.assocGet(
                 modGet(warmupAssocGetNodes, i),
                 modGet(warmupAssocGetAtypes, i),
@@ -34,7 +36,7 @@ public class AssocGet extends Benchmark {
     }
 
     @Override
-    public int query(int i) {
+    public int query(Graph g, int i) {
         return g.assocGet(
                 modGet(assocGetNodes, i),
                 modGet(assocGetAtypes, i),
