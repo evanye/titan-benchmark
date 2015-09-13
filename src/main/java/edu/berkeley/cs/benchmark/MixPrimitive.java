@@ -32,11 +32,11 @@ public class MixPrimitive extends Benchmark {
 
     @Override
     public void benchLatency() {
-        PrintWriter neighborOut = makeFileWriter(name + "_mix_Neighbor.csv");
-        PrintWriter neighborNodeOut = makeFileWriter(name + "_mix_NeighborNode.csv");
-        PrintWriter neighborAtypeOut = makeFileWriter(name + "_mix_NeighborAtype.csv");
-        PrintWriter nodeOut = makeFileWriter(name + "_mix_Node.csv");
-        PrintWriter nodeNodeOut = makeFileWriter(name + "_mix_NodeNode.csv");
+        PrintWriter neighborOut = makeFileWriter("mix_Neighbor.csv", false);
+        PrintWriter neighborNodeOut = makeFileWriter("mix_NeighborNode.csv", false);
+        PrintWriter neighborAtypeOut = makeFileWriter("mix_NeighborAtype.csv", false);
+        PrintWriter nodeOut = makeFileWriter("mix_Node.csv", false);
+        PrintWriter nodeNodeOut = makeFileWriter("mix_NodeNode.csv", false);
 
         int randQuery;
         Random rand = new Random(SEED);
@@ -127,15 +127,19 @@ public class MixPrimitive extends Benchmark {
 
     @Override
     public void benchThroughput(int numClients) {
+        PrintWriter throughputOut = makeFileWriter("throughput.csv", true);
         System.out.println("Titan mix query throughput with " + numClients + " clients.");
+
+        List<RunMixThroughput> jobs = new ArrayList<>(numClients);
+        List<Thread> clients = new ArrayList<>(numClients);
+        for (int i = 0; i < numClients; i++) {
+            jobs.add(new RunMixThroughput(i));
+            clients.add(new Thread(jobs.get(i)));
+        }
+        for (Thread thread : clients) {
+            thread.start();
+        }
         try {
-            List<Thread> clients = new ArrayList<>(numClients);
-            for (int i = 0; i < numClients; i++) {
-                clients.add(new Thread(new RunMixThroughput(i)));
-            }
-            for (Thread thread : clients) {
-                thread.start();
-            }
             for (Thread thread : clients) {
                 thread.join();
             }
@@ -143,14 +147,24 @@ public class MixPrimitive extends Benchmark {
             e.printStackTrace();
         }
 
+        double overallQueryThroughput = 0, overallResultThroughput = 0;
+        for (RunMixThroughput j: jobs) {
+            overallQueryThroughput += j.queryThroughput;
+            overallResultThroughput += j.resultThroughput;
+            throughputOut.printf("Client %d\t%f\t%f\n", j.clientId, j.queryThroughput, j.resultThroughput);
+        }
+        throughputOut.printf("Overall\t%f\t%f\n", overallQueryThroughput, overallResultThroughput);
         throughputOut.close();
         printMemoryFootprint();
     }
 
     class RunMixThroughput implements Runnable {
-        private int clientId;
+        int clientId;
         private Random rand;
         private Graph g;
+        // holds the results of the benchmarking
+        volatile double queryThroughput;
+        volatile double resultThroughput;
 
         public RunMixThroughput(int clientId) {
             this.clientId = clientId;
@@ -261,10 +275,8 @@ public class MixPrimitive extends Benchmark {
             long end = System.nanoTime();
             System.out.println("Client " + clientId + " finished measuring!");
             double totalSeconds = (end - start) * 1. / 1e9;
-            double queryThput = ((double) i) / totalSeconds;
-            double resultsThput = ((double) results ) / totalSeconds;
-
-            throughputOut.printf("%s,%f,%f\n", "Client " + clientId, queryThput, resultsThput);
+            queryThroughput = ((double) i) / totalSeconds;
+            resultThroughput = ((double) results ) / totalSeconds;
 
             System.out.println("Client " + clientId + " cooling down for " + (COOLDOWN_TIME / 1E9) + " seconds.");
             long cooldownStart = System.nanoTime();

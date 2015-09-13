@@ -20,7 +20,6 @@ public abstract class Benchmark {
     static String queryPath;
     static String outputPath;
     static String benchClassName;
-    PrintWriter throughputOut;
 
     // getNeighbors(n)
     List<Long> warmupNeighborIds = new ArrayList<>();
@@ -123,12 +122,6 @@ public abstract class Benchmark {
     public void init(String name) {
         this.name = name;
         g = new Graph();
-        try {
-            throughputOut = new PrintWriter(new FileWriter(
-                    Paths.get(outputPath, name + "_throughput.csv").toFile(), true));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public abstract void readQueries();
@@ -136,7 +129,7 @@ public abstract class Benchmark {
     public abstract int query(int i);
 
     public void benchLatency() {
-        PrintWriter out = makeFileWriter(name + "_" + benchClassName + ".csv");
+        PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
@@ -164,6 +157,7 @@ public abstract class Benchmark {
     }
 
     public void benchThroughput(int numClients) {
+        PrintWriter throughputOut = makeFileWriter("throughput.csv", true);
         System.out.println("Titan " + benchClassName + " query throughput");
         System.out.println("Warming up for " + WARMUP_TIME / 1E9 + " seconds");
         int i = 0;
@@ -253,10 +247,10 @@ public abstract class Benchmark {
         }
     }
 
-    public PrintWriter makeFileWriter(String outputName) {
+    public PrintWriter makeFileWriter(String outputName, boolean append) {
         try {
             return new PrintWriter(new BufferedWriter(
-                    new FileWriter(Paths.get(outputPath, outputName).toFile())));
+                    new FileWriter(Paths.get(outputPath, name + "_" + outputName).toFile(), append)));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
