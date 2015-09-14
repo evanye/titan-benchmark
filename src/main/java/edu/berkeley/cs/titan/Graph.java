@@ -14,7 +14,7 @@ import java.net.URL;
 import java.util.*;
 
 public class Graph {
-//    private TitanTransaction txn;
+    private TitanTransaction txn;
 
     // TitanGraph is static so is shared among multiple instances of Graph
     private static TitanGraph g = null;
@@ -47,12 +47,12 @@ public class Graph {
             }
         }
 
-//        txn = g.buildTransaction().start();
+        txn = g.buildTransaction().start();
     }
 
     public void restartTransaction() {
-//        txn.commit();
-//        txn = g.buildTransaction().start();
+        txn.commit();
+        txn = g.buildTransaction().start();
     }
 
     public List<Long> getNeighbors(long id) {
@@ -66,7 +66,7 @@ public class Graph {
 
     public Set<Long> getNodes(int propIdx, String search) {
         Set<Long> nodeIds = new HashSet<>();
-        for (Vertex v: g.getVertices("attr" + propIdx, search)) {
+        for (Vertex v: txn.getVertices("attr" + propIdx, search)) {
             long id = Long.parseLong(String.valueOf(v.getId()));
             nodeIds.add(TitanId.fromVertexId(id));
         }
@@ -180,7 +180,7 @@ public class Graph {
     public void warmup() {
         restartTransaction();
         long c = 0L;
-        for (Vertex v: g.getVertices()) {
+        for (Vertex v: txn.getVertices()) {
             v.getId();
             for (String key: v.getPropertyKeys()) {
                 Object prop = v.getProperty(key);
@@ -194,7 +194,7 @@ public class Graph {
 
         restartTransaction();
         c = 0L;
-        for (Edge e: g.getEdges()) {
+        for (Edge e: txn.getEdges()) {
             e.getId();
             e.getLabel();
             e.getVertex(Direction.IN); e.getVertex(Direction.OUT);
@@ -208,7 +208,7 @@ public class Graph {
     }
 
     private TitanVertex getNode(long id) {
-        return g.getVertex(TitanId.toVertexId(id + offset));
+        return txn.getVertex(TitanId.toVertexId(id + offset));
     }
 
     public static void shutdown() {

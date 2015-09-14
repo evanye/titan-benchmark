@@ -1,5 +1,7 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Graph;
+
 import java.util.Random;
 
 public abstract class RunThroughput implements Runnable {
@@ -11,7 +13,7 @@ public abstract class RunThroughput implements Runnable {
 
     int clientId;
     protected Random rand;
-//    protected Graph g;
+    protected Graph g;
     // holds the results of the benchmarking
     private volatile double queryThroughput;
     private volatile double resultThroughput;
@@ -19,7 +21,7 @@ public abstract class RunThroughput implements Runnable {
     public RunThroughput(int clientId) {
         this.clientId = clientId;
         rand = new Random(SEED + clientId);
-//        g = new Graph();
+        g = new Graph();
     }
 
     public abstract void warmupQuery();
@@ -33,7 +35,7 @@ public abstract class RunThroughput implements Runnable {
         System.out.println("Client " + clientId + " warming up for " + (WARMUP_TIME / 1E9) + " seconds.");
         while (System.nanoTime() - warmupStart < WARMUP_TIME) {
             if (i % 10000 == 0) {
-//                g.restartTransaction();
+                g.restartTransaction();
             }
             warmupQuery();
             ++i;
@@ -47,13 +49,15 @@ public abstract class RunThroughput implements Runnable {
         long start = System.nanoTime();
         while (System.nanoTime() - start < MEASURE_TIME) {
             if (i % 10000 == 0) {
-//                g.restartTransaction();
+                g.restartTransaction();
             }
 
             results += query();
             ++i;
         }
         long end = System.nanoTime();
+        g.restartTransaction();
+
         System.out.println("Client " + clientId + " finished measuring!");
         double totalSeconds = (end - start) * 1. / 1e9;
         queryThroughput = ((double) i) / totalSeconds;

@@ -12,7 +12,6 @@ public abstract class Benchmark {
     public static int WARMUP_N;
     public static int MEASURE_N;
 
-    Graph g = new Graph();
     static String name;
     static String queryPath;
     static String outputPath;
@@ -130,6 +129,7 @@ public abstract class Benchmark {
     }
 
     public void benchLatency() {
+        Graph g = new Graph();
         PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
@@ -178,7 +178,6 @@ public abstract class Benchmark {
             e.printStackTrace();
         }
 
-        g.shutdown();
         double overallQueryThroughput = 0, overallResultThroughput = 0;
         for (RunThroughput j: jobs) {
             overallQueryThroughput += j.getQueryThroughput();

@@ -5,7 +5,7 @@ dataset=livejournal
 latency=false
 throughput=true
 QUERY_DIR=/mnt/liveJournal-40attr16each-queries
-OUTPUT_DIR=/mnt/livejournal_output
+OUTPUT_DIR=/mnt/output
 
 # List of all possible queries you can benchmark against
 # Comment any out if you don't want to benchmark them
@@ -32,7 +32,7 @@ export MAVEN_OPTS="-Xmx102400M"
 
 warmup=100000
 measure=100000
-numClients=( 4 8 16 32 64 128 )
+numClients=( 1 8 64 )
 
 if [ "$latency" = true ]; then
   for test in "${tests[@]}"; do
