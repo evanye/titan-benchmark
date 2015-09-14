@@ -80,6 +80,7 @@ public class Load {
         int numProperty = conf.getInt("property.total");
         String nodeFile = conf.getString("data.node");
         String edgeFile = conf.getString("data.edge");
+        int offset = conf.getBoolean("zero_indexed") ? 1 : 0;
         System.out.printf("nodeFile %s, edgeFile %s, propertySize %d\n", nodeFile, edgeFile, propertySize);
 
         long c = 1L;
@@ -99,12 +100,14 @@ public class Load {
             }
         }
 
+        bg.commit();
+
         c = 1L;
         try (BufferedReader br = new BufferedReader(new FileReader(edgeFile))) {
             for (String line; (line = br.readLine()) != null; ) {
                 List<String> tokens = Lists.newArrayList(Splitter.on(' ').limit(5).trimResults().split(line));
-                Long id1 = Long.parseLong(tokens.get(0));
-                Long id2 = Long.parseLong(tokens.get(1));
+                Long id1 = Long.parseLong(tokens.get(0)) + offset;
+                Long id2 = Long.parseLong(tokens.get(1)) + offset;
                 String atype = tokens.get(2);
                 Long timestamp = Long.parseLong(tokens.get(3));
                 String property = tokens.get(4);

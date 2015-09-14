@@ -1,16 +1,15 @@
 package edu.berkeley.cs.titan;
 
-import com.google.common.collect.Sets;
 import edu.berkeley.cs.Load;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.io.FileUtils;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import java.io.File;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class GraphTest {
 
@@ -39,7 +38,7 @@ public class GraphTest {
 
     @Before
     public void initalizeGraph() throws InterruptedException {
-        g = new Graph("titan");
+        g = new Graph();
     }
 
     private void assertListEquals(List<?> l1, Object l2) {
