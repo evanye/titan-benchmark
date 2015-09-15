@@ -36,7 +36,11 @@ numClients=( 1 8 64 )
 
 if [ "$latency" = true ]; then
   for test in "${tests[@]}"; do
-    sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+    sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+    nodetool invalidaterowcache
+    nodetool invalidatekeycache
+    nodetool invalidatecountercache
+    sleep 2
     mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
       -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} 1 ${warmup} ${measure}"
   done
@@ -45,7 +49,11 @@ fi
 if [[ "$throughput" = true ]]; then
   for test in "${tests[@]}"; do
     for numClient in "${numClients[@]}"; do
-      sleep 2 && sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+      sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+      nodetool invalidaterowcache
+      nodetool invalidatekeycache
+      nodetool invalidatecountercache
+      sleep 2
       mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
         -Dexec.args="${test} throughput ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${numClient} 0 0"
     done
