@@ -6,6 +6,7 @@ latency=false
 throughput=true
 QUERY_DIR=/mnt/liveJournal-40attr16each-queries
 OUTPUT_DIR=/mnt/output
+mkdir -p $OUTPUT_DIR
 
 # List of all possible queries you can benchmark against
 # Comment any out if you don't want to benchmark them
@@ -28,7 +29,7 @@ tests=(
 
 #JVM_HEAP=6900
 #echo "Setting -Xmx to ${JVM_HEAP}m"
-export MAVEN_OPTS="-Xmx102400M"
+export MAVEN_OPTS="-verbose:gc -Xmx102400M"
 
 warmup=100000
 measure=100000

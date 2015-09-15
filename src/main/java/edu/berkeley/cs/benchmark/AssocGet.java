@@ -1,6 +1,9 @@
 package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,9 +15,16 @@ import java.util.Set;
 public class AssocGet extends Benchmark {
     public static final String WARMUP_FILE = "assocGet_warmup.txt";
     public static final String QUERY_FILE = "assocGet_query.txt";
+    private static int OFFSET;
 
     @Override
     public void readQueries() {
+        try {
+            Configuration config = new PropertiesConfiguration(getClass().getResource("/titan-cassandra.properties"));
+            OFFSET = config.getBoolean("zero_indexed") ? 1 : 0;
+        } catch (ConfigurationException e) {
+            e.printStackTrace();
+        }
         readAssocGetQueries(WARMUP_FILE,
                 warmupAssocGetNodes, warmupAssocGetAtypes,
                 warmupAssocGetDstIdSets, warmupAssocGetTimeLows,
@@ -65,6 +75,13 @@ public class AssocGet extends Benchmark {
                 int idx4 = line.indexOf(',', idx3 + 1);
                 tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
 
+                if (idx4 == -1) {
+                    tHighs.add(Long.parseLong(line.substring(idx3 + 1)));
+                    dstIdSets.add(new HashSet<Long>());
+                    line = br.readLine();
+                    continue;
+                }
+
                 int idxLast = idx4, idxCurr;
                 Set<Long> dstIdSet = new HashSet<>();
                 while (true) {
@@ -72,7 +89,7 @@ public class AssocGet extends Benchmark {
                     if (idxCurr == -1) {
                         break;
                     }
-                    dstIdSet.add(Long.parseLong(
+                    dstIdSet.add(OFFSET + Long.parseLong(
                             line.substring(idxLast + 1, idxCurr)));
                     idxLast = idxCurr;
                 }

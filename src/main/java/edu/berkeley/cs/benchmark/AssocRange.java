@@ -39,6 +39,23 @@ public class AssocRange extends Benchmark {
                 modGet(assocRangeLengths, i)).size();
     }
 
+    @Override
+    public RunThroughput getThroughputJob(int clientId) {
+        return new RunThroughput(clientId) {
+            @Override
+            public void warmupQuery() {
+                int idx = rand.nextInt(warmupAssocRangeNodes.size());
+                AssocRange.this.warmupQuery(g, idx);
+            }
+
+            @Override
+            public int query() {
+                int idx = rand.nextInt(assocRangeNodes.size());
+                return AssocRange.this.query(g, idx);
+            }
+        };
+    }
+
     static void readAssocRangeQueries(
             String file, List<Long> nodes, List<Integer> atypes,
             List<Integer> offsets, List<Integer> lengths) {
