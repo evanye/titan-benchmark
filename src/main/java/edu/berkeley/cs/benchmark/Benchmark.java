@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public abstract class Benchmark {
-    public static final long SEED = 1618L;
+    public static final long SEED = 2331L;
 
     public static int WARMUP_N;
     public static int MEASURE_N;
@@ -164,7 +164,7 @@ public abstract class Benchmark {
     }
 
     public void benchThroughput(int numClients) {
-        PrintWriter throughputOut = makeFileWriter("throughput.csv", true);
+        PrintWriter throughputOut = makeFileWriter(benchClassName + "_throughput.csv", true);
         System.out.println("Titan " + benchClassName + " query throughput with " + numClients + " clients.");
 
         List<RunThroughput> jobs = new ArrayList<>(numClients);
