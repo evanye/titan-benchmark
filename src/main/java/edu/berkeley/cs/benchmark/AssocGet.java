@@ -1,9 +1,6 @@
 package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -15,16 +12,9 @@ import java.util.Set;
 public class AssocGet extends Benchmark {
     public static final String WARMUP_FILE = "assocGet_warmup.txt";
     public static final String QUERY_FILE = "assocGet_query.txt";
-    private static int OFFSET;
 
     @Override
     public void readQueries() {
-        try {
-            Configuration config = new PropertiesConfiguration(getClass().getResource("/titan-cassandra.properties"));
-            OFFSET = config.getBoolean("zero_indexed") ? 1 : 0;
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-        }
         readAssocGetQueries(WARMUP_FILE,
                 warmupAssocGetNodes, warmupAssocGetAtypes,
                 warmupAssocGetDstIdSets, warmupAssocGetTimeLows,
@@ -89,7 +79,8 @@ public class AssocGet extends Benchmark {
                     if (idxCurr == -1) {
                         break;
                     }
-                    dstIdSet.add(OFFSET + Long.parseLong(
+                    //TODO: hack because of titan 1-indexing
+                    dstIdSet.add(1 + Long.parseLong(
                             line.substring(idxLast + 1, idxCurr)));
                     idxLast = idxCurr;
                 }
