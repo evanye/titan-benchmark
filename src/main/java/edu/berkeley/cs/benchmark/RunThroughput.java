@@ -7,9 +7,9 @@ import java.util.Random;
 public abstract class RunThroughput implements Runnable {
     public static final long WARMUP_TIME = (long) (60 * 1e9); // 120 seconds
     public static final long MEASURE_TIME = (long) (120 * 1e9);
-    public static final long COOLDOWN_TIME = (long) (60 * 1e9);
+    public static final long COOLDOWN_TIME = (long) (30 * 1e9);
 
-    public static final long SEED = 1618L;
+    public static final long SEED = 1945L;
 
     int clientId;
     protected Random rand;
