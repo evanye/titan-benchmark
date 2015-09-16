@@ -21,4 +21,21 @@ public class EdgeAttr extends Benchmark {
     public int query(Graph g, int i) {
         return g.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i)).size();
     }
+
+    @Override
+    public RunThroughput getThroughputJob(int clientId) {
+        return new RunThroughput(clientId) {
+            @Override
+            public void warmupQuery() {
+                int idx = rand.nextInt(warmupEdgeNodeIds.size());
+                EdgeAttr.this.warmupQuery(g, idx);
+            }
+
+            @Override
+            public int query() {
+                int idx = rand.nextInt(edgeNodeId.size());
+                return EdgeAttr.this.query(g, idx);
+            }
+        };
+    }
 }
