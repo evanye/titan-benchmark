@@ -1,7 +1,6 @@
 package edu.berkeley.cs.titan;
 
 import com.thinkaurelius.titan.core.*;
-
 import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
@@ -93,21 +92,37 @@ public class Graph {
     }
 
     public List<Long> getNeighborAtype(long id, int atypeIdx) {
-        List<TimestampedId> neighbors = new ArrayList<>();
+        List<TimestampedItem<Long>> neighbors = new ArrayList<>();
         TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atypeIdx])) {
             TitanVertex neighbor = edge.getOtherVertex(node);
-            neighbors.add(new TimestampedId(
-                    (long) edge.getProperty("timestamp"), TitanId.fromVertexID(neighbor))
-            );
+            neighbors.add(new TimestampedItem<Long>(
+                    (long) edge.getProperty("timestamp"), (long) TitanId.fromVertexID(neighbor)
+            ));
         }
         Collections.sort(neighbors);
 
         List<Long> result = new ArrayList<>();
-        for (TimestampedId neighbor: neighbors) {
-            result.add(neighbor.id);
+        for (TimestampedItem<Long> neighbor: neighbors) {
+            result.add(neighbor.item);
         }
         return result;
+    }
+
+    public List<String> getEdgeAttrs(long id, int atypeIdx) {
+        List<TimestampedItem<String>> edges = new ArrayList<>();
+        TitanVertex node = getNode(id);
+        for (TitanEdge e: node.getTitanEdges(Direction.OUT, intToAtype[atypeIdx])) {
+            edges.add(new TimestampedItem<String>(
+                    (long) TitanId.fromVertexID(e.getOtherVertex(node)), (String) e.getProperty("property")
+            ));
+        }
+        Collections.sort(edges);
+        List<String> results = new ArrayList<>(edges.size());
+        for (TimestampedItem<String> edge: edges) {
+            results.add(edge.item);
+        }
+        return results;
     }
 
     /**
@@ -215,15 +230,17 @@ public class Graph {
         g.shutdown();
     }
 
-    static class TimestampedId implements Comparable<TimestampedId> {
-        long timestamp, id;
-        public TimestampedId(long timestamp, long id) {
+    class TimestampedItem<T> implements Comparable<TimestampedItem<T>> {
+        long timestamp;
+        T item;
+        public TimestampedItem(long timestamp, T item) {
             this.timestamp = timestamp;
-            this.id = id;
+            this.item = item;
         }
+        @Override
         // Larger timestamp comes first.
-        public int compareTo(TimestampedId that) {
-            return Long.compare(that.timestamp, this.timestamp);
+        public int compareTo(TimestampedItem<T> o) {
+            return Long.compare(o.timestamp, this.timestamp);
         }
     }
 }

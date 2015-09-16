@@ -35,6 +35,12 @@ public abstract class Benchmark {
     List<Long> neighborAtypeIds = new ArrayList<>();
     List<Integer> neighborAtype = new ArrayList<>();
 
+    // getEdgeAttr(n, atype)
+    List<Long> warmupEdgeNodeIds = new ArrayList<>();
+    List<Integer> warmupEdgeAtype = new ArrayList<>();
+    List<Long> edgeNodeId = new ArrayList<>();
+    List<Integer> edgeAtype = new ArrayList<>();
+
     // getNodes(attr)
     List<Integer> warmupNodeAttrIds1 = new ArrayList<>();
     List<String> warmupNodeAttrs1 = new ArrayList<>();

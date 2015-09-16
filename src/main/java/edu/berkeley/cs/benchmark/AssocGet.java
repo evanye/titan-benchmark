@@ -73,7 +73,6 @@ public class AssocGet extends Benchmark {
                 tLows.add(Long.parseLong(line.substring(idx2 + 1, idx3)));
 
                 int idx4 = line.indexOf(',', idx3 + 1);
-                tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
 
                 if (idx4 == -1) {
                     tHighs.add(Long.parseLong(line.substring(idx3 + 1)));
@@ -81,6 +80,7 @@ public class AssocGet extends Benchmark {
                     line = br.readLine();
                     continue;
                 }
+                tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
 
                 int idxLast = idx4, idxCurr;
                 Set<Long> dstIdSet = new HashSet<>();
