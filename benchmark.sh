@@ -2,8 +2,8 @@
 set -e
 
 dataset=twitter
-latency=false
-throughput=true
+latency=true
+throughput=false
 QUERY_DIR=/mnt/mnt/twitter2010-40attr16each-queries
 OUTPUT_DIR=/mnt/mnt/output
 mkdir -p $OUTPUT_DIR
