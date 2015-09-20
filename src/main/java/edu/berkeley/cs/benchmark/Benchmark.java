@@ -167,7 +167,7 @@ public abstract class Benchmark<T> {
             if (resOut != null) {
                 if (results instanceof List<?>) {
                     List<?> resList = (List<?>) results;
-                    if (resList.get(0) instanceof Long) {
+                    if (resList.size() > 0 && resList.get(0) instanceof Long) {
                         List<Long> resLongList = (List<Long>) resList;
                         Collections.sort(resLongList);
                         print(resLongList, resOut);
