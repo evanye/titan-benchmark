@@ -6,7 +6,7 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 
-public abstract class Benchmark {
+public abstract class Benchmark<T> {
     public static final long SEED = 2331L;
 
     public static int WARMUP_N;
@@ -16,6 +16,7 @@ public abstract class Benchmark {
     static String queryPath;
     static String outputPath;
     static String benchClassName;
+    static PrintWriter resOut;
 
     // getNeighbors(n)
     List<Long> warmupNeighborIds = new ArrayList<>();
@@ -111,6 +112,10 @@ public abstract class Benchmark {
         Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
         b.readQueries();
         if ("latency".equals(latencyOrThroughput)) {
+            if (System.getenv("BENCH_PRINT_RESULTS") != null) {
+                resOut = makeFileWriter(benchClassName + ".titan_result", false);
+                System.out.println("Logging results to " + benchClassName + ".titan_result");
+            }
             b.benchLatency();
         } else if ("throughput".equals(latencyOrThroughput)) {
             b.benchThroughput(numClients);
@@ -121,8 +126,8 @@ public abstract class Benchmark {
     }
 
     public abstract void readQueries();
-    public abstract int warmupQuery(Graph g, int i);
-    public abstract int query(Graph g, int i);
+    public abstract T warmupQuery(Graph g, int i);
+    public abstract T query(Graph g, int i);
 
     /**
      * Returns a throughput job that computes query throughput.
@@ -137,6 +142,8 @@ public abstract class Benchmark {
     public void benchLatency() {
         Graph g = new Graph();
         PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
+        PrintWriter resOut = null;
+
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
         for (int i = 0; i < WARMUP_N; i++) {
@@ -154,9 +161,32 @@ public abstract class Benchmark {
                 System.out.println("Measured for " + i + " queries");
             }
             long start = System.nanoTime();
-            int numResults = query(g, i);
+            T results = query(g, i);
             long end = System.nanoTime();
             double microsecs = (end - start) / ((double) 1000);
+
+            if (resOut != null) {
+                if (results instanceof List<?>) {
+                    List<?> resList = (List<?>) results;
+                    if (resList.get(0) instanceof Long) {
+                        List<Long> resLongList = (List<Long>) resList;
+                        Collections.sort(resLongList);
+                        print(resLongList, resOut);
+                    } else {
+                        print(resList, resOut);
+                    }
+                } else if (results instanceof Set<?>) {
+                    List<Long> resList = new ArrayList<>();
+                    resList.addAll((Collection<? extends Long>) results);
+                    Collections.sort(resList);
+                    print(resList, resOut);
+                } else if (results instanceof Long) {
+                    resOut.println(results); resOut.flush();
+                } else {
+                    System.err.println("Invalid result type, has not been handled!");
+                }
+            }
+            long numResults = (results instanceof Collection<?>) ? ((Collection<?>) results).size() : (Long) results;
             out.println(numResults + "," + microsecs);
         }
         out.close();
@@ -198,6 +228,15 @@ public abstract class Benchmark {
 
     public static <T> T modGet(List<T> xs, int i) {
         return xs.get(i % xs.size());
+    }
+
+    public static <T> void print(Iterable<T> xs, PrintWriter out) {
+        if (out == null) return;
+        for (T x : xs) {
+            out.printf("%s ", x);
+        }
+        out.println();
+        out.flush();
     }
 
     public static void fullWarmup(Graph g) {
@@ -255,7 +294,7 @@ public abstract class Benchmark {
     public static PrintWriter makeFileWriter(String outputName, boolean append) {
         try {
             return new PrintWriter(new BufferedWriter(
-                    new FileWriter(Paths.get(outputPath, name + "_" + outputName).toFile(), append)));
+                    new FileWriter(Paths.get(outputPath, outputName).toFile(), append)));
         } catch (IOException e) {
             e.printStackTrace();
             return null;

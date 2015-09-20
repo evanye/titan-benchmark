@@ -2,7 +2,9 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
-public class NeighborAtype extends Benchmark {
+import java.util.List;
+
+public class NeighborAtype extends Benchmark<List<Long>> {
     public static final String WARMUP_FILE = "neighborAtype_warmup_100000.txt";
     public static final String QUERY_FILE = "neighborAtype_query_100000.txt";
 
@@ -13,13 +15,13 @@ public class NeighborAtype extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i)).size();
+    public List<Long> warmupQuery(Graph g, int i) {
+        return g.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i)).size();
+    public List<Long> query(Graph g, int i) {
+        return g.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
     }
 
     @Override
@@ -33,7 +35,7 @@ public class NeighborAtype extends Benchmark {
             @Override
             public int query() {
                 int idx = rand.nextInt(neighborAtypeIds.size());
-                return NeighborAtype.this.query(g, idx);
+                return NeighborAtype.this.query(g, idx).size();
             }
         };
     }

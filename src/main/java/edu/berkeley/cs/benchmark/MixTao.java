@@ -7,7 +7,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Random;
 
-public class MixTao extends Benchmark {
+public class MixTao extends Benchmark<Object> {
     // Read workload distribution; from ATC 13 Bronson et al.
     final static double ASSOC_RANGE_PERC = 0.409;
     final static double OBJ_GET_PERC = 0.289;
@@ -305,13 +305,13 @@ public class MixTao extends Benchmark {
      * These queries are not being used, since benchLatency is overriden.
      */
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return -1;
+    public Object warmupQuery(Graph g, int i) {
+        return null;
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return -1;
+    public Object query(Graph g, int i) {
+        return null;
     }
 
 }

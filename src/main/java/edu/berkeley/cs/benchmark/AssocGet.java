@@ -1,5 +1,6 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Assoc;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.BufferedReader;
@@ -9,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AssocGet extends Benchmark {
+public class AssocGet extends Benchmark<List<Assoc>> {
     public static final String WARMUP_FILE = "assocGet_warmup.txt";
     public static final String QUERY_FILE = "assocGet_query.txt";
 
@@ -26,23 +27,23 @@ public class AssocGet extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
+    public List<Assoc> warmupQuery(Graph g, int i) {
         return g.assocGet(
                 modGet(warmupAssocGetNodes, i),
                 modGet(warmupAssocGetAtypes, i),
                 modGet(warmupAssocGetDstIdSets, i),
                 modGet(warmupAssocGetTimeLows, i),
-                modGet(warmupAssocGetTimeHighs, i)).size();
+                modGet(warmupAssocGetTimeHighs, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
+    public List<Assoc> query(Graph g, int i) {
         return g.assocGet(
                 modGet(assocGetNodes, i),
                 modGet(assocGetAtypes, i),
                 modGet(assocGetDstIdSets, i),
                 modGet(assocGetTimeLows, i),
-                modGet(assocGetTimeHighs, i)).size();
+                modGet(assocGetTimeHighs, i));
     }
 
     static void readAssocGetQueries(

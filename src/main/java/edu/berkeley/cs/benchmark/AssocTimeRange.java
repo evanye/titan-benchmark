@@ -1,5 +1,6 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Assoc;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.BufferedReader;
@@ -7,7 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-public class AssocTimeRange extends Benchmark {
+public class AssocTimeRange extends Benchmark<List<Assoc>> {
     public static final String WARMUP_FILE = "assocTimeRange_warmup.txt";
     public static final String QUERY_FILE = "assocTimeRange_query.txt";
 
@@ -25,23 +26,23 @@ public class AssocTimeRange extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
+    public List<Assoc> warmupQuery(Graph g, int i) {
         return g.assocTimeRange(
                 modGet(warmupAssocTimeRangeNodes, i),
                 modGet(warmupAssocTimeRangeAtypes, i),
                 modGet(warmupAssocTimeRangeTimeLows, i),
                 modGet(warmupAssocTimeRangeTimeHighs, i),
-                modGet(warmupAssocTimeRangeLimits, i)).size();
+                modGet(warmupAssocTimeRangeLimits, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
+    public List<Assoc> query(Graph g, int i) {
         return g.assocTimeRange(
                 modGet(assocTimeRangeNodes, i),
                 modGet(assocTimeRangeAtypes, i),
                 modGet(assocTimeRangeTimeLows, i),
                 modGet(assocTimeRangeTimeHighs, i),
-                modGet(assocTimeRangeLimits, i)).size();
+                modGet(assocTimeRangeLimits, i));
     }
 
     static void readAssocTimeRangeQueries(

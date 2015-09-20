@@ -2,7 +2,9 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
-public class Neighbor extends Benchmark {
+import java.util.List;
+
+public class Neighbor extends Benchmark<List<Long>> {
     public static final String WARMUP_FILE = "neighbor_warmup_100000.txt";
     public static final String QUERY_FILE = "neighbor_query_100000.txt";
 
@@ -13,13 +15,13 @@ public class Neighbor extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return g.getNeighbors(modGet(warmupNeighborIds, i)).size();
+    public List<Long> warmupQuery(Graph g, int i) {
+        return g.getNeighbors(modGet(warmupNeighborIds, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return g.getNeighbors(modGet(neighborIds, i)).size();
+    public List<Long> query(Graph g, int i) {
+        return g.getNeighbors(modGet(neighborIds, i));
     }
 
     @Override

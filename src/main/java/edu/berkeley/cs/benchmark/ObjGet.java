@@ -2,7 +2,9 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
-public class ObjGet extends Benchmark {
+import java.util.List;
+
+public class ObjGet extends Benchmark<List<String>> {
     public static final String WARMUP_FILE = "objGet_warmup.txt";
     public static final String QUERY_FILE = "objGet_query.txt";
 
@@ -13,12 +15,12 @@ public class ObjGet extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return g.objGet(modGet(warmupObjGetIds, i)).size();
+    public List<String> warmupQuery(Graph g, int i) {
+        return g.objGet(modGet(warmupObjGetIds, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return g.objGet(modGet(objGetIds, i)).size();
+    public List<String> query(Graph g, int i) {
+        return g.objGet(modGet(objGetIds, i));
     }
 }

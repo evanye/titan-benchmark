@@ -7,7 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-public class NeighborNode extends Benchmark {
+public class NeighborNode extends Benchmark<List<Long>> {
     public static final String WARMUP_FILE = "neighbor_node_warmup_100000.txt";
     public static final String QUERY_FILE = "neighbor_node_query_100000.txt";
 
@@ -18,15 +18,15 @@ public class NeighborNode extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
+    public List<Long> warmupQuery(Graph g, int i) {
         return g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
-                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i)).size();
+                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
+    public List<Long> query(Graph g, int i) {
         return g.getNeighborNode(modGet(neighborNodeIds, i),
-                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i)).size();
+                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
     }
 
     @Override
@@ -40,7 +40,7 @@ public class NeighborNode extends Benchmark {
             @Override
             public int query() {
                 int idx = rand.nextInt(neighborNodeIds.size());
-                return NeighborNode.this.query(g, idx);
+                return NeighborNode.this.query(g, idx).size();
             }
         };
     }

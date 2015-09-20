@@ -1,5 +1,6 @@
 package edu.berkeley.cs.benchmark;
 
+import edu.berkeley.cs.titan.Assoc;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.BufferedReader;
@@ -7,7 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-public class AssocRange extends Benchmark {
+public class AssocRange extends Benchmark<List<Assoc>> {
     public static final String WARMUP_FILE = "assocRange_warmup.txt";
     public static final String QUERY_FILE = "assocRange_query.txt";
 
@@ -22,21 +23,21 @@ public class AssocRange extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
+    public List<Assoc> warmupQuery(Graph g, int i) {
         return g.assocRange(
                 modGet(warmupAssocRangeNodes, i),
                 modGet(warmupAssocRangeAtypes, i),
                 modGet(warmupAssocRangeOffsets, i),
-                modGet(warmupAssocRangeLengths, i)).size();
+                modGet(warmupAssocRangeLengths, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
+    public List<Assoc> query(Graph g, int i) {
         return g.assocRange(
                 modGet(assocRangeNodes, i),
                 modGet(assocRangeAtypes, i),
                 modGet(assocRangeOffsets, i),
-                modGet(assocRangeLengths, i)).size();
+                modGet(assocRangeLengths, i));
     }
 
     @Override
@@ -51,7 +52,7 @@ public class AssocRange extends Benchmark {
             @Override
             public int query() {
                 int idx = rand.nextInt(assocRangeNodes.size());
-                return AssocRange.this.query(g, idx);
+                return AssocRange.this.query(g, idx).size();
             }
         };
     }

@@ -6,8 +6,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
-public class Node extends Benchmark {
+public class Node extends Benchmark<Set<Long>> {
     public static final String WARMUP_FILE = "node_warmup_100000.txt";
     public static final String QUERY_FILE = "node_query_100000.txt";
 
@@ -18,13 +19,13 @@ public class Node extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i)).size();
+    public Set<Long> warmupQuery(Graph g, int i) {
+        return g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i)).size();
+    public Set<Long> query(Graph g, int i) {
+        return g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
     }
 
     @Override
@@ -38,7 +39,7 @@ public class Node extends Benchmark {
             @Override
             public int query() {
                 int idx = rand.nextInt(nodeAttrIds1.size());
-                return Node.this.query(g, idx);
+                return Node.this.query(g, idx).size();
             }
         };
     }

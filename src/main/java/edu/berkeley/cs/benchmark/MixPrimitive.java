@@ -3,11 +3,9 @@ package edu.berkeley.cs.benchmark;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.PrintWriter;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
-public class MixPrimitive extends Benchmark {
+public class MixPrimitive extends Benchmark<Object> {
 
     @Override
     public void readQueries() {
@@ -89,6 +87,8 @@ public class MixPrimitive extends Benchmark {
                     start = System.nanoTime();
                     List<Long> neighbors = graph.getNeighbors(modGet(neighborIds, i));
                     end = System.nanoTime();
+                    Collections.sort(neighbors);
+                    print(neighbors, resOut);
                     neighborOut.println(neighbors.size() + "," + (end - start) / (1000.0));
                     break;
                 case 1:
@@ -96,12 +96,16 @@ public class MixPrimitive extends Benchmark {
                     List<Long> neighborNodes = graph.getNeighborNode(modGet(neighborNodeIds, i),
                             modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
                     end = System.nanoTime();
+                    Collections.sort(neighborNodes);
+                    print(neighborNodes, resOut);
                     neighborNodeOut.println(neighborNodes.size() + "," + (end - start) / (1000.0));
                     break;
                 case 2:
                     start = System.nanoTime();
                     List<Long> neighborAtypes = graph.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
                     end = System.nanoTime();
+                    Collections.sort(neighborAtypes);
+                    print(neighborAtypes, resOut);
                     neighborAtypeOut.println(neighborAtypes.size() + "," + (end - start) / 1000.0);
                     break;
                 case 3:
@@ -109,6 +113,8 @@ public class MixPrimitive extends Benchmark {
 //                    Set<Long> nodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
                     List<String> edgeAttrs = graph.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i));
                     end = System.nanoTime();
+                    Collections.sort(edgeAttrs);
+                    print(edgeAttrs, resOut);
                     nodeOut.println(edgeAttrs.size() + "," + (end - start) / 1000.0);
                     break;
                 case 4:
@@ -116,6 +122,8 @@ public class MixPrimitive extends Benchmark {
                     Set<Long> nodeNodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
                             modGet(nodeAttrIds2, i), modGet(nodeAttrs2, i));
                     end = System.nanoTime();
+                    List<Long> results = new ArrayList<>(nodeNodes);
+                    print(results, resOut);
                     nodeNodeOut.println(nodeNodes.size() + "," + (end - start) / 1000.0);
                     break;
             }
@@ -219,13 +227,13 @@ public class MixPrimitive extends Benchmark {
      */
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return -1;
+    public Object warmupQuery(Graph g, int i) {
+        return null;
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return -1;
+    public Object query(Graph g, int i) {
+        return null;
     }
 
 }

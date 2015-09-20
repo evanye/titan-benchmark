@@ -2,7 +2,9 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
-public class EdgeAttr extends Benchmark {
+import java.util.List;
+
+public class EdgeAttr extends Benchmark<List<String>> {
     public static final String WARMUP_FILE = "neighborAtype_warmup_100000.txt";
     public static final String QUERY_FILE = "neighborAtype_query_100000.txt";
 
@@ -13,13 +15,13 @@ public class EdgeAttr extends Benchmark {
     }
 
     @Override
-    public int warmupQuery(Graph g, int i) {
-        return g.getEdgeAttrs(modGet(warmupEdgeNodeIds, i), modGet(warmupEdgeAtype, i)).size();
+    public List<String> warmupQuery(Graph g, int i) {
+        return g.getEdgeAttrs(modGet(warmupEdgeNodeIds, i), modGet(warmupEdgeAtype, i));
     }
 
     @Override
-    public int query(Graph g, int i) {
-        return g.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i)).size();
+    public List<String> query(Graph g, int i) {
+        return g.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i));
     }
 
     @Override
@@ -34,7 +36,7 @@ public class EdgeAttr extends Benchmark {
             @Override
             public int query() {
                 int idx = rand.nextInt(edgeNodeId.size());
-                return EdgeAttr.this.query(g, idx);
+                return EdgeAttr.this.query(g, idx).size();
             }
         };
     }
