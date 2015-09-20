@@ -58,7 +58,7 @@ public class Graph {
         List<Long> neighbors = new ArrayList<>();
         TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
-            neighbors.add(TitanId.fromVertexID(edge.getOtherVertex(node)));
+            neighbors.add(getId(edge.getOtherVertex(node)));
         }
         return neighbors;
     }
@@ -66,8 +66,7 @@ public class Graph {
     public Set<Long> getNodes(int propIdx, String search) {
         Set<Long> nodeIds = new HashSet<>();
         for (Vertex v: txn.getVertices("attr" + propIdx, search)) {
-            long id = Long.parseLong(String.valueOf(v.getId()));
-            nodeIds.add(TitanId.fromVertexId(id));
+            nodeIds.add(getId(v));
         }
         return nodeIds;
     }
@@ -85,7 +84,7 @@ public class Graph {
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT)) {
             TitanVertex neighbor = edge.getOtherVertex(node);
             if (search.equals(neighbor.getProperty("attr" + propIdx))) {
-                result.add(TitanId.fromVertexID(neighbor));
+                result.add(getId(neighbor));
             }
         }
         return result;
@@ -96,8 +95,8 @@ public class Graph {
         TitanVertex node = getNode(id);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atypeIdx])) {
             TitanVertex neighbor = edge.getOtherVertex(node);
-            neighbors.add(new TimestampedItem<Long>(
-                    (long) edge.getProperty("timestamp"), (long) TitanId.fromVertexID(neighbor)
+            neighbors.add(new TimestampedItem<>(
+                    (long) edge.getProperty("timestamp"), getId(neighbor)
             ));
         }
         Collections.sort(neighbors);
@@ -113,8 +112,8 @@ public class Graph {
         List<TimestampedItem<String>> edges = new ArrayList<>();
         TitanVertex node = getNode(id);
         for (TitanEdge e: node.getTitanEdges(Direction.OUT, intToAtype[atypeIdx])) {
-            edges.add(new TimestampedItem<String>(
-                    (long) TitanId.fromVertexID(e.getOtherVertex(node)), (String) e.getProperty("property")
+            edges.add(new TimestampedItem<>(
+                    getId(e.getOtherVertex(node)), (String) e.getProperty("property")
             ));
         }
         Collections.sort(edges);
@@ -222,7 +221,16 @@ public class Graph {
         restartTransaction();
     }
 
-    private TitanVertex getNode(long id) {
+    protected static long getId(TitanVertex v) {
+        return TitanId.fromVertexID(v) - offset;
+    }
+
+    protected static long getId(Vertex v) {
+        long titanId = (long) v.getId();
+        return TitanId.fromVertexId(titanId) - offset;
+    }
+
+    protected TitanVertex getNode(long id) {
         return txn.getVertex(TitanId.toVertexId(id + offset));
     }
 

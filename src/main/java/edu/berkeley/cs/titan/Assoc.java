@@ -1,7 +1,6 @@
 package edu.berkeley.cs.titan;
 
 import com.thinkaurelius.titan.core.TitanEdge;
-import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
 
 public class Assoc implements Comparable<Assoc> {
@@ -10,8 +9,8 @@ public class Assoc implements Comparable<Assoc> {
     public String prop; // For now assumes one edge attribute
 
     public Assoc(TitanEdge edge) {
-        this.srcId = TitanId.fromVertexID(edge.getVertex(Direction.OUT));
-        this.dstId = TitanId.fromVertexID(edge.getVertex(Direction.IN));
+        this.srcId = Graph.getId(edge.getVertex(Direction.OUT));
+        this.dstId = Graph.getId(edge.getVertex(Direction.IN));
         this.atype = Integer.valueOf(String.valueOf(edge.getEdgeLabel()));
         this.timestamp = edge.getProperty("timestamp");
         this.prop = edge.getProperty("property");
