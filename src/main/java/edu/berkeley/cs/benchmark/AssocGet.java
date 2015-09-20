@@ -80,8 +80,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
                     if (idxCurr == -1) {
                         break;
                     }
-                    //TODO: hack because of titan 1-indexing
-                    dstIdSet.add(1 + Long.parseLong(
+                    dstIdSet.add(Long.parseLong(
                             line.substring(idxLast + 1, idxCurr)));
                     idxLast = idxCurr;
                 }

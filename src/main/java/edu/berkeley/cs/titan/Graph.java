@@ -156,7 +156,7 @@ public class Graph {
         List<Assoc> assocs = new ArrayList<>();
         Assoc assoc;
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
-            if (dstIdSet.contains(TitanId.fromVertexID(edge.getOtherVertex(node)))) {
+            if (dstIdSet.contains(getId(edge.getOtherVertex(node)))) {
                 assoc = new Assoc(edge);
                 if (assoc.timestamp >= low && assoc.timestamp <= high) {
                     assocs.add(assoc);
