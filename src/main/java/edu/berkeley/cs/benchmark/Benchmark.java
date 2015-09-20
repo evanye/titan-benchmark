@@ -172,7 +172,11 @@ public abstract class Benchmark<T> {
                         Collections.sort(resLongList);
                         print(resLongList, resOut);
                     } else {
-                        print(resList, resOut);
+                        for (Object s: resList) {
+                            resOut.print("'" + s + "', ");
+                        }
+                        resOut.println();
+                        resOut.flush();
                     }
                 } else if (results instanceof Set<?>) {
                     List<Long> resList = new ArrayList<>();
