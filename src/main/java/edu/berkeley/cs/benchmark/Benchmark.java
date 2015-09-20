@@ -142,7 +142,6 @@ public abstract class Benchmark<T> {
     public void benchLatency() {
         Graph g = new Graph();
         PrintWriter out = makeFileWriter(benchClassName + ".csv", false);
-        PrintWriter resOut = null;
 
         System.out.println("Titan " + benchClassName + " query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
