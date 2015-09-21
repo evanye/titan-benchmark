@@ -11,7 +11,6 @@ fi
 
 sbin="`dirname "$0"`"
 host_file=nsdi-10cass.hosts
-
 HOSTLIST=`cat ${sbin}/../conf/${host_file}`
 
 # By default disable strict host key checking

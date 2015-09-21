@@ -5,10 +5,6 @@ import edu.berkeley.cs.titan.Graph;
 import java.util.Random;
 
 public abstract class RunThroughput implements Runnable {
-    public static final long WARMUP_TIME = (long) (60 * 1e9); // 120 seconds
-    public static final long MEASURE_TIME = (long) (120 * 1e9);
-    public static final long COOLDOWN_TIME = (long) (30 * 1e9);
-
     public static final long SEED = 1945L;
 
     int clientId;
@@ -32,8 +28,8 @@ public abstract class RunThroughput implements Runnable {
         // warmup
         int i = 0;
         long warmupStart = System.nanoTime();
-        System.out.println("Client " + clientId + " warming up for " + (WARMUP_TIME / 1E9) + " seconds.");
-        while (System.nanoTime() - warmupStart < WARMUP_TIME) {
+        System.out.println("Client " + clientId + " warming up for " + (Benchmark.WARMUP_TIME / 1E9) + " seconds.");
+        while (System.nanoTime() - warmupStart < Benchmark.WARMUP_TIME) {
             if (i % 10000 == 0) {
                 g.restartTransaction();
             }
@@ -45,9 +41,9 @@ public abstract class RunThroughput implements Runnable {
         // measure
         i = 0;
         long results = 0;
-        System.out.println("Client " + clientId + " measuring for " + (MEASURE_TIME / 1E9) + " seconds.");
+        System.out.println("Client " + clientId + " measuring for " + (Benchmark.MEASURE_TIME / 1E9) + " seconds.");
         long start = System.nanoTime();
-        while (System.nanoTime() - start < MEASURE_TIME) {
+        while (System.nanoTime() - start < Benchmark.MEASURE_TIME) {
             if (i % 10000 == 0) {
                 g.restartTransaction();
             }
@@ -63,9 +59,9 @@ public abstract class RunThroughput implements Runnable {
         queryThroughput = ((double) i) / totalSeconds;
         resultThroughput = ((double) results ) / totalSeconds;
 
-        System.out.println("Client " + clientId + " cooling down for " + (COOLDOWN_TIME / 1E9) + " seconds.");
+        System.out.println("Client " + clientId + " cooling down for " + (Benchmark.COOLDOWN_TIME / 1E9) + " seconds.");
         long cooldownStart = System.nanoTime();
-        while (System.nanoTime() - cooldownStart < COOLDOWN_TIME) {
+        while (System.nanoTime() - cooldownStart < Benchmark.COOLDOWN_TIME) {
             warmupQuery();
         }
         System.out.println("Client " + clientId + " finished cooling down!");

@@ -34,6 +34,9 @@ export MAVEN_OPTS="-verbose:gc -server -Xmx50000M"
 
 warmup=100000
 measure=200000
+warmup_time=30
+measure_time=60
+cooldown_time=15
 numClients=( 1 8 64 128 )
 
 if [ "$latency" = true ]; then
@@ -48,7 +51,7 @@ if [ "$latency" = true ]; then
     nodetool invalidatecountercache
     sleep 2
     mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
-      -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} 1 ${warmup} ${measure}"
+      -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${warmup} ${measure}"
   done
 fi
 
@@ -65,7 +68,7 @@ if [[ "$throughput" = true ]]; then
       nodetool invalidatecountercache
       sleep 2
       mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
-        -Dexec.args="${test} throughput ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${numClient} 0 0"
+        -Dexec.args="${test} throughput ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${numClient} ${warmup_time} ${measure_time} ${cooldown_time}"
     done
   done
 fi

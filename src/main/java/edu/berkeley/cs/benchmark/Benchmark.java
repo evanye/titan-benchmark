@@ -12,6 +12,10 @@ public abstract class Benchmark<T> {
     public static int WARMUP_N;
     public static int MEASURE_N;
 
+    public static long WARMUP_TIME = (long) (60 * 1e9); // 120 seconds
+    public static long MEASURE_TIME = (long) (120 * 1e9);
+    public static long COOLDOWN_TIME = (long) (30 * 1e9);
+
     static String name;
     static String queryPath;
     static String outputPath;
@@ -104,9 +108,6 @@ public abstract class Benchmark<T> {
         name = args[2];
         queryPath = args[3];
         outputPath = args[4];
-        int numClients = Integer.parseInt(args[5]);
-        WARMUP_N = Integer.parseInt(args[6]);
-        MEASURE_N = Integer.parseInt(args[7]);
 
         String fullClassName = Benchmark.class.getPackage().getName() + "." + benchClassName;
         Benchmark b = (Benchmark) Class.forName(fullClassName).newInstance();
@@ -116,8 +117,14 @@ public abstract class Benchmark<T> {
                 resOut = makeFileWriter(benchClassName + ".titan_result", false);
                 System.out.println("Logging results to " + benchClassName + ".titan_result");
             }
+            WARMUP_N = Integer.parseInt(args[5]);
+            MEASURE_N = Integer.parseInt(args[6]);
             b.benchLatency();
         } else if ("throughput".equals(latencyOrThroughput)) {
+            int numClients = Integer.parseInt(args[5]);
+            WARMUP_TIME = (long) (Integer.parseInt(args[6]) * 1E9);
+            MEASURE_TIME = (long) (Integer.parseInt(args[7]) * 1E9);
+            COOLDOWN_TIME = (long) (Integer.parseInt(args[8]) * 1E9);
             b.benchThroughput(numClients);
         } else {
             System.err.println("Please choose 'latency' or 'throughput'.");
