@@ -22,10 +22,8 @@ public class GraphTest {
     @BeforeClass
     public static void setUp() throws Exception {
         System.out.println("Setting up");
-        Configuration config = new PropertiesConfiguration() {{
-            setProperty("name", "titan");
-            setProperty("property.total", 40);
-            setProperty("property.size", 16);
+        Configuration config = new PropertiesConfiguration(
+                GraphTest.class.getResource("/benchmark.properties")) {{
             setProperty("atype.total", 6);
             setProperty("data.node", GraphTest.class.getResource("/node").getPath());
             setProperty("data.edge", GraphTest.class.getResource("/edge").getPath());
@@ -99,6 +97,18 @@ public class GraphTest {
         assertEquals("NE|AIR|refully u", properties.get(0));
         assertEquals("ns sleep careful", properties.get(16));
         assertEquals("AKE BACK RETURN|", properties.get(39));
+    }
+
+    @Test
+    public void testEdgeGet() throws Exception {
+        assertListEquals(Arrays.asList(
+                "64|12892632|892633|1|21|34103.79|0.05|0.02|R|F|1994-09-30|1994-09-18|1994-10-26|DELIVER IN PERSON|REG AIR|ch slyly final, thin p",
+                "7|22784072|1409118|5|38|43887.72|0.08|0.01|N|O|1996-02-11|1996-02-24|1996-02-18|DELIVER IN PERSON|TRUCK|ns haggle carefully iron"),
+                g.getEdgeAttrs(1, 0));
+        assertListEquals(Arrays.asList(
+                "1018497|27133722|508741|4|41|71929.17|0.05|0.03|A|F|1995-03-01|1995-01-22|1995-03-16|DELIVER IN PERSON|TRUCK|y. quickly ironic  ",
+                "1018469|20276209|401249|1|15|17762.85|0.05|0.04|N|O|1997-07-11|1997-08-14|1997-08-04|DELIVER IN PERSON|TRUCK|ide of the bravely "),
+                g.getEdgeAttrs(5, 5));
     }
 
     private List<Long> assocToId(List<Assoc> l) {
