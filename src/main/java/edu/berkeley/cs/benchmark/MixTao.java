@@ -16,7 +16,6 @@ public class MixTao extends Benchmark<Object> {
     final static double ASSOC_TIME_RANGE_PERC = 0.028;
 
     final static int SEED = 1618;
-    final static Random rand = new Random(SEED);
 
     @Override
     public void readQueries() {
@@ -109,7 +108,7 @@ public class MixTao extends Benchmark<Object> {
                     graph.assocGet(
                             warmupAssocGetNodes[i],
                             warmupAssocGetAtypes[i],
-                            warmupAssocGetDstIdSets.get(i),
+                            warmupAssocGetDstIdSets[i],
                             warmupAssocGetTimeLows[i],
                             warmupAssocGetTimeHighs[i]).size();
                 case 3:
@@ -165,7 +164,7 @@ public class MixTao extends Benchmark<Object> {
                     assocs = graph.assocGet(
                             assocGetNodes[i],
                             assocGetAtypes[i],
-                            assocGetDstIdSets.get(i),
+                            assocGetDstIdSets[i],
                             assocGetTimeLows[i],
                             assocGetTimeHighs[i]);
                     end = System.nanoTime();
@@ -231,7 +230,7 @@ public class MixTao extends Benchmark<Object> {
                         g.assocGet(
                                 warmupAssocGetNodes[i],
                                 warmupAssocGetAtypes[i],
-                                warmupAssocGetDstIdSets.get(i),
+                                warmupAssocGetDstIdSets[i],
                                 warmupAssocGetTimeLows[i],
                                 warmupAssocGetTimeHighs[i]).size();
                     case 3:
@@ -274,7 +273,7 @@ public class MixTao extends Benchmark<Object> {
                         return g.assocGet(
                                 assocGetNodes[i],
                                 assocGetAtypes[i],
-                                assocGetDstIdSets.get(i),
+                                assocGetDstIdSets[i],
                                 assocGetTimeLows[i],
                                 assocGetTimeHighs[i]).size();
                     case 3:

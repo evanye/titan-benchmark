@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AssocGet extends Benchmark<List<Assoc>> {
     public static final String WARMUP_FILE = "assocGet_warmup.txt";
@@ -31,7 +30,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
         return g.assocGet(
                 warmupAssocGetNodes[i],
                 warmupAssocGetAtypes[i],
-                warmupAssocGetDstIdSets.get(i),
+                warmupAssocGetDstIdSets[i],
                 warmupAssocGetTimeLows[i],
                 warmupAssocGetTimeHighs[i]);
     }
@@ -41,14 +40,14 @@ public class AssocGet extends Benchmark<List<Assoc>> {
         return g.assocGet(
                 assocGetNodes[i],
                 assocGetAtypes[i],
-                assocGetDstIdSets.get(i),
+                assocGetDstIdSets[i],
                 assocGetTimeLows[i],
                 assocGetTimeHighs[i]);
     }
 
     static void readAssocGetQueries(
             String file, long[] nodes, int[] atypes,
-            List<Set<Long>> dstIdSets, long[] tLows, long[] tHighs) {
+            HashSet[] dstIdSets, long[] tLows, long[] tHighs) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
@@ -66,14 +65,14 @@ public class AssocGet extends Benchmark<List<Assoc>> {
                 int idx4 = line.indexOf(',', idx3 + 1);
 
                 if (idx4 == -1) {
-                    tHighs[i] = (Long.parseLong(line.substring(idx3 + 1)));
-                    dstIdSets.add(new HashSet<Long>());
+                    tHighs[i] = Long.parseLong(line.substring(idx3 + 1));
+                    dstIdSets[i] = new HashSet();
                     continue;
                 }
                 tHighs[i] = (Long.parseLong(line.substring(idx3 + 1, idx4)));
 
                 int idxLast = idx4, idxCurr;
-                Set<Long> dstIdSet = new HashSet<>();
+                HashSet dstIdSet = new HashSet();
                 while (true) {
                     idxCurr = line.indexOf(',', idxLast + 1);
                     if (idxCurr == -1) {
@@ -84,7 +83,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
                     idxLast = idxCurr;
                 }
                 dstIdSet.add(Long.parseLong(line.substring(idxLast + 1)));
-                dstIdSets.add(dstIdSet);
+                dstIdSets[i] = dstIdSet;
             }
         } catch (IOException e) {
             e.printStackTrace();

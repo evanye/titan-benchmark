@@ -103,8 +103,8 @@ public abstract class Benchmark<T> {
     long[] assocGetNodes = new long[assocGet_query];
     int[] warmupAssocGetAtypes = new int[assocGet_warmup];
     int[] assocGetAtypes = new int[assocGet_query];
-    List<Set<Long>> warmupAssocGetDstIdSets = new ArrayList<>(assocGet_warmup);
-    List<Set<Long>> assocGetDstIdSets = new ArrayList<>(assocGet_query);
+    HashSet[] warmupAssocGetDstIdSets = new HashSet[assocGet_warmup];
+    HashSet[] assocGetDstIdSets = new HashSet[assocGet_query];
     long[] warmupAssocGetTimeLows = new long[assocGet_warmup];
     long[] assocGetTimeLows = new long[assocGet_query];
     long[] warmupAssocGetTimeHighs = new long[assocGet_warmup];
