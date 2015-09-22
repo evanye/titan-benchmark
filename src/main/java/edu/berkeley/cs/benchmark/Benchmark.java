@@ -70,11 +70,11 @@ public abstract class Benchmark<T> {
     // getNodes(attr)
     int[] warmupNodeAttrIds1 = new int[node_warmup];
     String[] warmupNodeAttrs1 = new String[node_warmup];
-    int[] nodeAttrIds1 = new int[node_warmup];
-    String[] nodeAttrs1 = new String[node_warmup];
+    int[] nodeAttrIds1 = new int[node_query];
+    String[] nodeAttrs1 = new String[node_query];
     // second set for getNodes(attr1, attr2)
-    int[] warmupNodeAttrIds2 = new int[node_query];
-    String[] warmupNodeAttrs2 = new String[node_query];
+    int[] warmupNodeAttrIds2 = new int[node_warmup];
+    String[] warmupNodeAttrs2 = new String[node_warmup];
     int[] nodeAttrIds2 = new int[node_query];
     String[] nodeAttrs2 = new String[node_query];
 
