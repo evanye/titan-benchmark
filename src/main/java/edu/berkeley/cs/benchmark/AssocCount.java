@@ -14,12 +14,12 @@ public class AssocCount extends Benchmark<Long> {
 
     @Override
     public Long warmupQuery(Graph g, int i) {
-        return g.assocCount(modGet(warmupAssocCountNodes, i), modGet(warmupAssocCountAtypes, i));
+        return g.assocCount(warmupAssocCountNodes[i], warmupAssocCountAtypes[i]);
     }
 
     @Override
     public Long query(Graph g, int i) {
-        return g.assocCount(modGet(assocCountNodes, i), modGet(assocCountAtypes, i));
+        return g.assocCount(assocCountNodes[i], assocCountAtypes[i]);
     }
 
 }

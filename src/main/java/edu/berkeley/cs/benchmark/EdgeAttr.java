@@ -16,12 +16,12 @@ public class EdgeAttr extends Benchmark<List<String>> {
 
     @Override
     public List<String> warmupQuery(Graph g, int i) {
-        return g.getEdgeAttrs(modGet(warmupEdgeNodeIds, i), modGet(warmupEdgeAtype, i));
+        return g.getEdgeAttrs(warmupEdgeNodeIds[i], warmupEdgeAtype[i]);
     }
 
     @Override
     public List<String> query(Graph g, int i) {
-        return g.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i));
+        return g.getEdgeAttrs(edgeNodeId[i], edgeAtype[i]);
     }
 
     @Override
@@ -29,13 +29,13 @@ public class EdgeAttr extends Benchmark<List<String>> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                int idx = rand.nextInt(warmupEdgeNodeIds.size());
+                int idx = rand.nextInt(edgeAttr_warmup);
                 EdgeAttr.this.warmupQuery(g, idx);
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(edgeNodeId.size());
+                int idx = rand.nextInt(edgeAttr_query);
                 return EdgeAttr.this.query(g, idx).size();
             }
         };

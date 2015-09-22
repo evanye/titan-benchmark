@@ -5,7 +5,6 @@ import edu.berkeley.cs.titan.Graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 public class Node extends Benchmark<Set<Long>> {
@@ -20,12 +19,12 @@ public class Node extends Benchmark<Set<Long>> {
 
     @Override
     public Set<Long> warmupQuery(Graph g, int i) {
-        return g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
+        return g.getNodes(warmupNodeAttrIds1[i], warmupNodeAttrs1[i]);
     }
 
     @Override
     public Set<Long> query(Graph g, int i) {
-        return g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
+        return g.getNodes(nodeAttrIds1[i], nodeAttrs1[i]);
     }
 
     @Override
@@ -33,30 +32,31 @@ public class Node extends Benchmark<Set<Long>> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                Node.this.warmupQuery(g, rand.nextInt(warmupNodeAttrIds1.size()));
+                int idx = rand.nextInt(node_warmup);
+                Node.this.warmupQuery(g, idx);
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(nodeAttrIds1.size());
+                int idx = rand.nextInt(node_query);
                 return Node.this.query(g, idx).size();
             }
         };
     }
 
     static void getNodeQueries(
-            String file, List<Integer> indices1, List<Integer> indices2,
-            List<String> queries1, List<String> queries2) {
+            String file, int[] indices1, int[] indices2,
+            String[] queries1, String[] queries2) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            String line = br.readLine();
-            while (line != null) {
+            for (int i = 0; i < indices1.length; i++) {
+                String line = br.readLine();
                 String[] tokens = line.split("\\x02");
-                indices1.add(Integer.parseInt(tokens[0]));
-                queries1.add(tokens[1]);
-                indices2.add(Integer.parseInt(tokens[2]));
-                queries2.add(tokens[3]);
+                indices1[i] = Integer.parseInt(tokens[0]);
+                queries1[i] = tokens[1];
+                indices2[i] = Integer.parseInt(tokens[2]);
+                queries2[i] = tokens[3];
                 line = br.readLine();
             }
         } catch (IOException e) {

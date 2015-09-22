@@ -25,19 +25,19 @@ public class AssocRange extends Benchmark<List<Assoc>> {
     @Override
     public List<Assoc> warmupQuery(Graph g, int i) {
         return g.assocRange(
-                modGet(warmupAssocRangeNodes, i),
-                modGet(warmupAssocRangeAtypes, i),
-                modGet(warmupAssocRangeOffsets, i),
-                modGet(warmupAssocRangeLengths, i));
+                warmupAssocRangeNodes[i],
+                warmupAssocRangeAtypes[i],
+                warmupAssocRangeOffsets[i],
+                warmupAssocRangeLengths[i]);
     }
 
     @Override
     public List<Assoc> query(Graph g, int i) {
         return g.assocRange(
-                modGet(assocRangeNodes, i),
-                modGet(assocRangeAtypes, i),
-                modGet(assocRangeOffsets, i),
-                modGet(assocRangeLengths, i));
+                assocRangeNodes[i],
+                assocRangeAtypes[i],
+                assocRangeOffsets[i],
+                assocRangeLengths[i]);
     }
 
     @Override
@@ -45,37 +45,36 @@ public class AssocRange extends Benchmark<List<Assoc>> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                int idx = rand.nextInt(warmupAssocRangeNodes.size());
+                int idx = rand.nextInt(assocRange_warmup);
                 AssocRange.this.warmupQuery(g, idx);
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(assocRangeNodes.size());
+                int idx = rand.nextInt(assocRange_query);
                 return AssocRange.this.query(g, idx).size();
             }
         };
     }
 
     static void readAssocRangeQueries(
-            String file, List<Long> nodes, List<Integer> atypes,
-            List<Integer> offsets, List<Integer> lengths) {
+            String file, long[] nodes, int[] atypes,
+            int[] offsets, int[] lengths) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            String line = br.readLine();
-            while (line != null) {
+            for (int i = 0; i < nodes.length; i++) {
+                String line = br.readLine();
                 int idx = line.indexOf(',');
-                nodes.add(Long.parseLong(line.substring(0, idx)));
+                nodes[i] = (Long.parseLong(line.substring(0, idx)));
 
                 int idx2 = line.indexOf(',', idx + 1);
-                atypes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
+                atypes[i] = (Integer.parseInt(line.substring(idx + 1, idx2)));
 
                 int idx3 = line.indexOf(',', idx2 + 1);
-                offsets.add(Integer.parseInt(line.substring(idx2 + 1, idx3)));
+                offsets[i] = (Integer.parseInt(line.substring(idx2 + 1, idx3)));
 
-                lengths.add(Integer.parseInt(line.substring(idx3 + 1)));
-                line = br.readLine();
+                lengths[i] = (Integer.parseInt(line.substring(idx3 + 1)));
             }
         } catch (IOException e) {
             e.printStackTrace();

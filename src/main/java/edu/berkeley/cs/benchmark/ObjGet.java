@@ -16,11 +16,11 @@ public class ObjGet extends Benchmark<List<String>> {
 
     @Override
     public List<String> warmupQuery(Graph g, int i) {
-        return g.objGet(modGet(warmupObjGetIds, i));
+        return g.objGet(warmupObjGetIds[i]);
     }
 
     @Override
     public List<String> query(Graph g, int i) {
-        return g.objGet(modGet(objGetIds, i));
+        return g.objGet(objGetIds[i]);
     }
 }

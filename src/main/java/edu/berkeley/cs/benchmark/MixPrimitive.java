@@ -52,22 +52,22 @@ public class MixPrimitive extends Benchmark<Object> {
             randQuery = rand.nextInt(5);
             switch(randQuery) {
                 case 0:
-                    graph.getNeighbors(modGet(warmupNeighborIds, i));
+                    graph.getNeighbors(warmupNeighborIds[i]);
                     break;
                 case 1:
-                    graph.getNeighborNode(modGet(warmupNeighborNodeIds, i),
-                            modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
+                    graph.getNeighborNode(warmupNeighborNodeIds[i],
+                            warmupNeighborNodeAttrIds[i], warmupNeighborNodeAttrs[i]);
                     break;
                 case 2:
-                    graph.getNeighborAtype(modGet(warmupNeighborAtypeIds, i), modGet(warmupNeighborAtype, i));
+                    graph.getNeighborAtype(warmupNeighborAtypeIds[i], warmupNeighborAtype[i]);
                     break;
                 case 3:
-//                    graph.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i));
-                    graph.getEdgeAttrs(modGet(warmupEdgeNodeIds, i), modGet(warmupEdgeAtype, i));
+//                    graph.getNodes(warmupNodeAttrIds1[i], warmupNodeAttrs1[i]);
+                    graph.getEdgeAttrs(warmupEdgeNodeIds[i], warmupEdgeAtype[i]);
                     break;
                 case 4:
-                    graph.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i),
-                            modGet(warmupNodeAttrIds2, i), modGet(warmupNodeAttrs2, i));
+                    graph.getNodes(warmupNodeAttrIds1[i], warmupNodeAttrs1[i],
+                            warmupNodeAttrIds2[i], warmupNodeAttrs2[i]);
                     break;
             }
         }
@@ -85,7 +85,7 @@ public class MixPrimitive extends Benchmark<Object> {
             switch(randQuery) {
                 case 0:
                     start = System.nanoTime();
-                    List<Long> neighbors = graph.getNeighbors(modGet(neighborIds, i));
+                    List<Long> neighbors = graph.getNeighbors(neighborIds[i]);
                     end = System.nanoTime();
                     Collections.sort(neighbors);
                     print(neighbors, resOut);
@@ -93,8 +93,8 @@ public class MixPrimitive extends Benchmark<Object> {
                     break;
                 case 1:
                     start = System.nanoTime();
-                    List<Long> neighborNodes = graph.getNeighborNode(modGet(neighborNodeIds, i),
-                            modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
+                    List<Long> neighborNodes = graph.getNeighborNode(neighborNodeIds[i],
+                            neighborNodeAttrIds[i], neighborNodeAttrs[i]);
                     end = System.nanoTime();
                     Collections.sort(neighborNodes);
                     print(neighborNodes, resOut);
@@ -102,7 +102,7 @@ public class MixPrimitive extends Benchmark<Object> {
                     break;
                 case 2:
                     start = System.nanoTime();
-                    List<Long> neighborAtypes = graph.getNeighborAtype(modGet(neighborAtypeIds, i), modGet(neighborAtype, i));
+                    List<Long> neighborAtypes = graph.getNeighborAtype(neighborAtypeIds[i], neighborAtype[i]);
                     end = System.nanoTime();
                     Collections.sort(neighborAtypes);
                     print(neighborAtypes, resOut);
@@ -110,8 +110,8 @@ public class MixPrimitive extends Benchmark<Object> {
                     break;
                 case 3:
                     start = System.nanoTime();
-//                    Set<Long> nodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i));
-                    List<String> edgeAttrs = graph.getEdgeAttrs(modGet(edgeNodeId, i), modGet(edgeAtype, i));
+//                    Set<Long> nodes = graph.getNodes(nodeAttrIds1[i], nodeAttrs1[i]);
+                    List<String> edgeAttrs = graph.getEdgeAttrs(edgeNodeId[i], edgeAtype[i]);
                     end = System.nanoTime();
                     Collections.sort(edgeAttrs);
                     print(edgeAttrs, resOut);
@@ -119,8 +119,8 @@ public class MixPrimitive extends Benchmark<Object> {
                     break;
                 case 4:
                     start = System.nanoTime();
-                    Set<Long> nodeNodes = graph.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
-                            modGet(nodeAttrIds2, i), modGet(nodeAttrs2, i));
+                    Set<Long> nodeNodes = graph.getNodes(nodeAttrIds1[i], nodeAttrs1[i],
+                            nodeAttrIds2[i], nodeAttrs2[i]);
                     end = System.nanoTime();
                     List<Long> results = new ArrayList<>(nodeNodes);
                     print(results, resOut);
@@ -145,34 +145,34 @@ public class MixPrimitive extends Benchmark<Object> {
                 int randQuery = rand.nextInt(5), queryIdx;
                 switch (randQuery) {
                     case 0:
-                        queryIdx = rand.nextInt(warmupNeighborIds.size());
-                        g.getNeighbors(modGet(warmupNeighborIds, queryIdx));
+                        queryIdx = rand.nextInt(neighbor_warmup);
+                        g.getNeighbors(warmupNeighborIds[queryIdx]);
                         break;
                     case 1:
-                        queryIdx = rand.nextInt(warmupNeighborNodeIds.size());
+                        queryIdx = rand.nextInt(neighborNode_warmup);
                         g.getNeighborNode(
-                                modGet(warmupNeighborNodeIds, queryIdx),
-                                modGet(warmupNeighborNodeAttrIds, queryIdx),
-                                modGet(warmupNeighborNodeAttrs, queryIdx));
+                                warmupNeighborNodeIds[queryIdx],
+                                warmupNeighborNodeAttrIds[queryIdx],
+                                warmupNeighborNodeAttrs[queryIdx]);
                         break;
                     case 2:
 //                        queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
-//                        g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
-//                                modGet(warmupNodeAttrs1, queryIdx));
-                        queryIdx = rand.nextInt(warmupEdgeNodeIds.size());
-                        g.getEdgeAttrs(modGet(warmupEdgeNodeIds, queryIdx), modGet(warmupEdgeAtype, queryIdx));
+//                        g.getNodes(warmupNodeAttrIds1[queryIdx],
+//                                warmupNodeAttrs1[queryIdx]);
+                        queryIdx = rand.nextInt(edgeAttr_warmup);
+                        g.getEdgeAttrs(warmupEdgeNodeIds[queryIdx], warmupEdgeAtype[queryIdx]);
                         break;
                     case 3:
-                        queryIdx = rand.nextInt(warmupNeighborAtypeIds.size());
-                        g.getNeighborAtype(modGet(warmupNeighborAtypeIds, queryIdx),
-                                modGet(warmupNeighborAtype, queryIdx));
+                        queryIdx = rand.nextInt(neighborAtype_warmup);
+                        g.getNeighborAtype(warmupNeighborAtypeIds[queryIdx],
+                                warmupNeighborAtype[queryIdx]);
                         break;
                     case 4:
-                        queryIdx = rand.nextInt(warmupNodeAttrIds1.size());
-                        g.getNodes(modGet(warmupNodeAttrIds1, queryIdx),
-                                modGet(warmupNodeAttrs1, queryIdx),
-                                modGet(warmupNodeAttrIds2, queryIdx),
-                                modGet(warmupNodeAttrs2, queryIdx));
+                        queryIdx = rand.nextInt(node_warmup);
+                        g.getNodes(warmupNodeAttrIds1[queryIdx],
+                                warmupNodeAttrs1[queryIdx],
+                                warmupNodeAttrIds2[queryIdx],
+                                warmupNodeAttrs2[queryIdx]);
                         break;
                 }
             }
@@ -184,38 +184,38 @@ public class MixPrimitive extends Benchmark<Object> {
                 switch (randQuery) {
                     case 0:
                         // get_nhbrs(n)
-                        queryIdx = rand.nextInt(neighborIds.size());
-                        return g.getNeighbors(modGet(neighborIds, queryIdx)).size();
+                        queryIdx = rand.nextInt(neighbor_query);
+                        return g.getNeighbors(neighborIds[queryIdx]).size();
                     case 1:
                         // get_nhbrs(n, attr)
-                        queryIdx = rand.nextInt(neighborNodeIds.size());
+                        queryIdx = rand.nextInt(neighborNode_query);
                         return g.getNeighborNode(
-                                modGet(neighborNodeIds, queryIdx),
-                                modGet(neighborNodeAttrIds, queryIdx),
-                                modGet(neighborNodeAttrs, queryIdx)).size();
+                                neighborNodeIds[queryIdx],
+                                neighborNodeAttrIds[queryIdx],
+                                neighborNodeAttrs[queryIdx]).size();
                     case 2:
                         // get_nodes(attr)
 //                        queryIdx = rand.nextInt(nodeAttrIds1.size());
 //                        return g.getNodes(
-//                                modGet(nodeAttrIds1, queryIdx),
-//                                modGet(nodeAttrs1, queryIdx)).size();
-                        queryIdx = rand.nextInt(edgeNodeId.size());
-                        return g.getEdgeAttrs(modGet(edgeNodeId, queryIdx),
-                                modGet(edgeAtype, queryIdx)).size();
+//                                nodeAttrIds1[queryIdx],
+//                                nodeAttrs1[queryIdx]).size();
+                        queryIdx = rand.nextInt(edgeAttr_query);
+                        return g.getEdgeAttrs(edgeNodeId[queryIdx],
+                                edgeAtype[queryIdx]).size();
                     case 3:
                         // get_nhbrs(n, atype)
-                        queryIdx = rand.nextInt(neighborAtype.size());
+                        queryIdx = rand.nextInt(neighborAtype_query);
                         return g.getNeighborAtype(
-                                modGet(neighborAtypeIds, queryIdx),
-                                modGet(neighborAtype, queryIdx)).size();
+                                neighborAtypeIds[queryIdx],
+                                neighborAtype[queryIdx]).size();
                     case 4:
                         // get_nodes(attr1, attr2)
-                        queryIdx = rand.nextInt(nodeAttrIds1.size());
+                        queryIdx = rand.nextInt(node_query);
                         return g.getNodes(
-                                modGet(nodeAttrIds1, queryIdx),
-                                modGet(nodeAttrs1, queryIdx),
-                                modGet(nodeAttrIds2, queryIdx),
-                                modGet(nodeAttrs2, queryIdx)).size();
+                                nodeAttrIds1[queryIdx],
+                                nodeAttrs1[queryIdx],
+                                nodeAttrIds2[queryIdx],
+                                nodeAttrs2[queryIdx]).size();
                 }
                 return Integer.MIN_VALUE;
             }

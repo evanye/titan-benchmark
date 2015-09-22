@@ -28,46 +28,44 @@ public class AssocTimeRange extends Benchmark<List<Assoc>> {
     @Override
     public List<Assoc> warmupQuery(Graph g, int i) {
         return g.assocTimeRange(
-                modGet(warmupAssocTimeRangeNodes, i),
-                modGet(warmupAssocTimeRangeAtypes, i),
-                modGet(warmupAssocTimeRangeTimeLows, i),
-                modGet(warmupAssocTimeRangeTimeHighs, i),
-                modGet(warmupAssocTimeRangeLimits, i));
+                warmupAssocTimeRangeNodes[i],
+                warmupAssocTimeRangeAtypes[i],
+                warmupAssocTimeRangeTimeLows[i],
+                warmupAssocTimeRangeTimeHighs[i],
+                warmupAssocTimeRangeLimits[i]);
     }
 
     @Override
     public List<Assoc> query(Graph g, int i) {
         return g.assocTimeRange(
-                modGet(assocTimeRangeNodes, i),
-                modGet(assocTimeRangeAtypes, i),
-                modGet(assocTimeRangeTimeLows, i),
-                modGet(assocTimeRangeTimeHighs, i),
-                modGet(assocTimeRangeLimits, i));
+                assocTimeRangeNodes[i],
+                assocTimeRangeAtypes[i],
+                assocTimeRangeTimeLows[i],
+                assocTimeRangeTimeHighs[i],
+                assocTimeRangeLimits[i]);
     }
 
     static void readAssocTimeRangeQueries(
-            String file, List<Long> nodes, List<Integer> atypes,
-            List<Long> tLows, List<Long> tHighs, List<Integer> limits) {
+            String file, long[] nodes, int[] atypes,
+            long[] tLows, long[] tHighs, int[] limits) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            String line = br.readLine();
-            while (line != null) {
+            for (int i = 0; i < nodes.length; i++) {
+                String line = br.readLine();
                 int idx = line.indexOf(',');
-                nodes.add(Long.parseLong(line.substring(0, idx)));
+                nodes[i] = (Long.parseLong(line.substring(0, idx)));
 
                 int idx2 = line.indexOf(',', idx + 1);
-                atypes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
+                atypes[i] = (Integer.parseInt(line.substring(idx + 1, idx2)));
 
                 int idx3 = line.indexOf(',', idx2 + 1);
-                tLows.add(Long.parseLong(line.substring(idx2 + 1, idx3)));
+                tLows[i] = (Long.parseLong(line.substring(idx2 + 1, idx3)));
 
                 int idx4 = line.indexOf(',', idx3 + 1);
-                tHighs.add(Long.parseLong(line.substring(idx3 + 1, idx4)));
+                tHighs[i] = (Long.parseLong(line.substring(idx3 + 1, idx4)));
 
-                limits.add(Integer.parseInt(line.substring(idx4 + 1)));
-
-                line = br.readLine();
+                limits[i] = (Integer.parseInt(line.substring(idx4 + 1)));
             }
         } catch (IOException e) {
             e.printStackTrace();

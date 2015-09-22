@@ -8,14 +8,14 @@ public class NodeNode extends Node {
 
     @Override
     public Set<Long> warmupQuery(Graph g, int i) {
-        return g.getNodes(modGet(warmupNodeAttrIds1, i), modGet(warmupNodeAttrs1, i),
-                modGet(warmupNodeAttrIds2, i), modGet(warmupNodeAttrs2, i));
+        return g.getNodes(warmupNodeAttrIds1[i], warmupNodeAttrs1[i],
+                warmupNodeAttrIds2[i], warmupNodeAttrs2[i]);
     }
 
     @Override
     public Set<Long> query(Graph g, int i) {
-        return g.getNodes(modGet(nodeAttrIds1, i), modGet(nodeAttrs1, i),
-                modGet(nodeAttrIds2, i), modGet(nodeAttrs2, i));
+        return g.getNodes(nodeAttrIds1[i], nodeAttrs1[i],
+                nodeAttrIds2[i], nodeAttrs2[i]);
     }
 
     @Override
@@ -23,12 +23,13 @@ public class NodeNode extends Node {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                NodeNode.this.warmupQuery(g, rand.nextInt(warmupNodeAttrIds1.size()));
+                int idx = rand.nextInt(node_warmup);
+                NodeNode.this.warmupQuery(g, rand.nextInt(idx));
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(nodeAttrIds1.size());
+                int idx = rand.nextInt(node_query);
                 return NodeNode.this.query(g, idx).size();
             }
         };

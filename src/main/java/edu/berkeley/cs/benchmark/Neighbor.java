@@ -16,12 +16,12 @@ public class Neighbor extends Benchmark<List<Long>> {
 
     @Override
     public List<Long> warmupQuery(Graph g, int i) {
-        return g.getNeighbors(modGet(warmupNeighborIds, i));
+        return g.getNeighbors(warmupNeighborIds[i]);
     }
 
     @Override
     public List<Long> query(Graph g, int i) {
-        return g.getNeighbors(modGet(neighborIds, i));
+        return g.getNeighbors(neighborIds[i]);
     }
 
     @Override
@@ -29,14 +29,14 @@ public class Neighbor extends Benchmark<List<Long>> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                int idx = rand.nextInt(warmupNeighborIds.size());
-                g.getNeighbors(modGet(warmupNeighborIds, idx));
+                int idx = rand.nextInt(neighbor_warmup);
+                Neighbor.this.warmupQuery(g, idx);
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(neighborIds.size());
-                return g.getNeighbors(modGet(neighborIds, idx)).size();
+                int idx = rand.nextInt(neighbor_query);
+                return Neighbor.this.query(g, idx).size();
             }
         };
     }

@@ -19,14 +19,14 @@ public class NeighborNode extends Benchmark<List<Long>> {
 
     @Override
     public List<Long> warmupQuery(Graph g, int i) {
-        return g.getNeighborNode(modGet(warmupNeighborNodeIds, i),
-                modGet(warmupNeighborNodeAttrIds, i), modGet(warmupNeighborNodeAttrs, i));
+        return g.getNeighborNode(warmupNeighborNodeIds[i],
+                warmupNeighborNodeAttrIds[i], warmupNeighborNodeAttrs[i]);
     }
 
     @Override
     public List<Long> query(Graph g, int i) {
-        return g.getNeighborNode(modGet(neighborNodeIds, i),
-                modGet(neighborNodeAttrIds, i), modGet(neighborNodeAttrs, i));
+        return g.getNeighborNode(neighborNodeIds[i],
+                neighborNodeAttrIds[i], neighborNodeAttrs[i]);
     }
 
     @Override
@@ -34,31 +34,31 @@ public class NeighborNode extends Benchmark<List<Long>> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
-                NeighborNode.this.warmupQuery(g, rand.nextInt(warmupNeighborNodeIds.size()));
+                int idx = rand.nextInt(neighborNode_warmup);
+                NeighborNode.this.warmupQuery(g, idx);
             }
 
             @Override
             public int query() {
-                int idx = rand.nextInt(neighborNodeIds.size());
+                int idx = rand.nextInt(neighborNode_query);
                 return NeighborNode.this.query(g, idx).size();
             }
         };
     }
 
     static void getNeighborNodeQueries(
-            String file, List<Long> indices,
-            List<Integer> attributes, List<String> queries) {
+            String file, long[] indices,
+            int[] attributes, String[] queries) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            String line = br.readLine();
-            while (line != null) {
+            for (int i = 0; i < indices.length; i++) {
+                String line = br.readLine();
                 int idx = line.indexOf(',');
-                indices.add(Long.parseLong(line.substring(0, idx)));
+                indices[i] = Long.parseLong(line.substring(0, idx));
                 int idx2 = line.indexOf(',', idx + 1);
-                attributes.add(Integer.parseInt(line.substring(idx + 1, idx2)));
-                queries.add(line.substring(idx2 + 1));
-                line = br.readLine();
+                attributes[i] = Integer.parseInt(line.substring(idx + 1, idx2));
+                queries[i] = line.substring(idx2 + 1);
             }
         } catch (IOException e) {
             e.printStackTrace();

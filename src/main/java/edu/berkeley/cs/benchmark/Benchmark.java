@@ -16,6 +16,27 @@ public abstract class Benchmark<T> {
     public static long MEASURE_TIME = (long) (120 * 1e9);
     public static long COOLDOWN_TIME = (long) (30 * 1e9);
 
+    public static final int assocCount_query = 12000000;
+    public static final int assocCount_warmup = 2000000;
+    public static final int assocGet_query = 12000000;
+    public static final int assocGet_warmup = 2000000;
+    public static final int assocRange_query = 12000000;
+    public static final int assocRange_warmup = 2000000;
+    public static final int assocTimeRange_query = 12000000;
+    public static final int assocTimeRange_warmup = 2000000;
+    public static final int objGet_query = 12000000;
+    public static final int objGet_warmup = 2000000;
+    public static final int neighborAtype_query = 12000000;
+    public static final int neighborAtype_warmup = 2000000;
+    public static final int edgeAttr_warmup = neighborAtype_warmup;
+    public static final int edgeAttr_query = neighborAtype_warmup;
+    public static final int neighborNode_query = 6000000;
+    public static final int neighborNode_warmup = 1000000;
+    public static final int neighbor_query = 6000000;
+    public static final int neighbor_warmup = 1000000;
+    public static final int node_query = 6000000;
+    public static final int node_warmup = 1000000;
+
     static String name;
     static String queryPath;
     static String outputPath;
@@ -23,84 +44,83 @@ public abstract class Benchmark<T> {
     static PrintWriter resOut;
 
     // getNeighbors(n)
-    List<Long> warmupNeighborIds = new ArrayList<>();
-    List<Long> neighborIds = new ArrayList<>();
+    long[] warmupNeighborIds = new long[neighbor_warmup];
+    long[] neighborIds = new long[neighbor_query];
 
     // getNeighborsNode(n, attr)
-    List<Long> warmupNeighborNodeIds = new ArrayList<>();
-    List<Integer> warmupNeighborNodeAttrIds = new ArrayList<>();
-    List<String> warmupNeighborNodeAttrs = new ArrayList<>();
-    List<Long> neighborNodeIds = new ArrayList<>();
-    List<Integer> neighborNodeAttrIds = new ArrayList<>();
-    List<String> neighborNodeAttrs = new ArrayList<>();
+    long[] warmupNeighborNodeIds = new long[neighborNode_warmup];
+    int[] warmupNeighborNodeAttrIds = new int[neighborNode_warmup];
+    String[] warmupNeighborNodeAttrs = new String[neighborNode_warmup];
+    long[] neighborNodeIds = new long[neighborNode_query];
+    int[] neighborNodeAttrIds = new int[neighborNode_query];
+    String[] neighborNodeAttrs = new String[neighborNode_query];
 
     // getNeighbors(n, atype)
-    List<Long> warmupNeighborAtypeIds = new ArrayList<>();
-    List<Integer> warmupNeighborAtype = new ArrayList<>();
-    List<Long> neighborAtypeIds = new ArrayList<>();
-    List<Integer> neighborAtype = new ArrayList<>();
+    long[] warmupNeighborAtypeIds = new long[neighborAtype_warmup];
+    int[] warmupNeighborAtype = new int[neighborAtype_warmup];
+    long[] neighborAtypeIds = new long[neighborAtype_query];
+    int[] neighborAtype = new int[neighborAtype_query];
 
     // getEdgeAttr(n, atype)
-    List<Long> warmupEdgeNodeIds = new ArrayList<>();
-    List<Integer> warmupEdgeAtype = new ArrayList<>();
-    List<Long> edgeNodeId = new ArrayList<>();
-    List<Integer> edgeAtype = new ArrayList<>();
+    long[] warmupEdgeNodeIds = new long[edgeAttr_warmup];
+    int[] warmupEdgeAtype = new int[edgeAttr_warmup];
+    long[] edgeNodeId = new long[edgeAttr_query];
+    int[] edgeAtype = new int[edgeAttr_query];
 
     // getNodes(attr)
-    List<Integer> warmupNodeAttrIds1 = new ArrayList<>();
-    List<String> warmupNodeAttrs1 = new ArrayList<>();
-    List<Integer> nodeAttrIds1 = new ArrayList<>();
-    List<String> nodeAttrs1 = new ArrayList<>();
+    int[] warmupNodeAttrIds1 = new int[node_warmup];
+    String[] warmupNodeAttrs1 = new String[node_warmup];
+    int[] nodeAttrIds1 = new int[node_warmup];
+    String[] nodeAttrs1 = new String[node_warmup];
     // second set for getNodes(attr1, attr2)
-    List<Integer> warmupNodeAttrIds2 = new ArrayList<>();
-    List<String> warmupNodeAttrs2 = new ArrayList<>();
-    List<Integer> nodeAttrIds2 = new ArrayList<>();
-    List<String> nodeAttrs2 = new ArrayList<>();
+    int[] warmupNodeAttrIds2 = new int[node_query];
+    String[] warmupNodeAttrs2 = new String[node_query];
+    int[] nodeAttrIds2 = new int[node_query];
+    String[] nodeAttrs2 = new String[node_query];
 
     // assoc_range()
-    List<Long> warmupAssocRangeNodes = new ArrayList<>();
-    List<Long> assocRangeNodes = new ArrayList<>();
-    List<Integer> warmupAssocRangeAtypes = new ArrayList<>();
-    List<Integer> assocRangeAtypes = new ArrayList<>();
-    List<Integer> warmupAssocRangeOffsets = new ArrayList<>();
-    List<Integer> assocRangeOffsets = new ArrayList<>();
-    List<Integer> warmupAssocRangeLengths = new ArrayList<>();
-    List<Integer> assocRangeLengths = new ArrayList<>();
+    long[] warmupAssocRangeNodes = new long[assocRange_warmup];
+    long[] assocRangeNodes = new long[assocRange_query];
+    int[] warmupAssocRangeAtypes = new int[assocRange_warmup];
+    int[] assocRangeAtypes = new int[assocRange_query];
+    int[] warmupAssocRangeOffsets = new int[assocRange_warmup];
+    int[] assocRangeOffsets = new int[assocRange_query];
+    int[] warmupAssocRangeLengths = new int[assocRange_warmup];
+    int[] assocRangeLengths = new int[assocRange_query];
 
     // assoc_count()
-    List<Long> warmupAssocCountNodes = new ArrayList<>();
-    List<Long> assocCountNodes = new ArrayList<>();
-    List<Integer> warmupAssocCountAtypes = new ArrayList<>();
-    List<Integer> assocCountAtypes = new ArrayList<>();
+    long[] warmupAssocCountNodes = new long[assocCount_warmup];
+    long[] assocCountNodes = new long[assocCount_query];
+    int[] warmupAssocCountAtypes = new int[assocCount_warmup];
+    int[] assocCountAtypes = new int[assocCount_query];
 
     // obj_get()
-    List<Long> warmupObjGetIds = new ArrayList<>();
-    List<Long> objGetIds = new ArrayList<>();
+    long[] warmupObjGetIds = new long[objGet_warmup];
+    long[] objGetIds = new long[objGet_query];
 
     // assoc_get()
-    List<Long> warmupAssocGetNodes = new ArrayList<>();
-    List<Long> assocGetNodes = new ArrayList<>();
-    List<Integer> warmupAssocGetAtypes = new ArrayList<>();
-    List<Integer> assocGetAtypes = new ArrayList<>();
-    List<Set<Long>> warmupAssocGetDstIdSets = new ArrayList<>();
-    List<Set<Long>> assocGetDstIdSets = new ArrayList<>();
-    List<Long> warmupAssocGetTimeLows = new ArrayList<>();
-    List<Long> assocGetTimeLows = new ArrayList<>();
-    List<Long> warmupAssocGetTimeHighs = new ArrayList<>();
-    List<Long> assocGetTimeHighs = new ArrayList<>();
+    long[] warmupAssocGetNodes = new long[assocGet_warmup];
+    long[] assocGetNodes = new long[assocGet_query];
+    int[] warmupAssocGetAtypes = new int[assocGet_warmup];
+    int[] assocGetAtypes = new int[assocGet_query];
+    List<Set<Long>> warmupAssocGetDstIdSets = new ArrayList<>(assocGet_warmup);
+    List<Set<Long>> assocGetDstIdSets = new ArrayList<>(assocGet_query);
+    long[] warmupAssocGetTimeLows = new long[assocGet_warmup];
+    long[] assocGetTimeLows = new long[assocGet_query];
+    long[] warmupAssocGetTimeHighs = new long[assocGet_warmup];
+    long[] assocGetTimeHighs = new long[assocGet_query];
 
     // assoc_time_range()
-    List<Long> warmupAssocTimeRangeNodes = new ArrayList<>();
-    List<Long> assocTimeRangeNodes = new ArrayList<>();
-    List<Integer> warmupAssocTimeRangeAtypes = new ArrayList<>();
-    List<Integer> assocTimeRangeAtypes = new ArrayList<>();
-    List<Long> warmupAssocTimeRangeTimeLows = new ArrayList<>();
-    List<Long> assocTimeRangeTimeLows = new ArrayList<>();
-    List<Long> warmupAssocTimeRangeTimeHighs = new ArrayList<>();
-    List<Long> assocTimeRangeTimeHighs = new ArrayList<>();
-    List<Integer> warmupAssocTimeRangeLimits = new ArrayList<>();
-    List<Integer> assocTimeRangeLimits = new ArrayList<>();
-
+    long[] warmupAssocTimeRangeNodes = new long[assocTimeRange_warmup];
+    long[] assocTimeRangeNodes = new long[assocTimeRange_query];
+    int[] warmupAssocTimeRangeAtypes = new int[assocTimeRange_warmup];
+    int[] assocTimeRangeAtypes = new int[assocTimeRange_query];
+    long[] warmupAssocTimeRangeTimeLows = new long[assocTimeRange_warmup];
+    long[] assocTimeRangeTimeLows = new long[assocTimeRange_query];
+    long[] warmupAssocTimeRangeTimeHighs = new long[assocTimeRange_warmup];
+    long[] assocTimeRangeTimeHighs = new long[assocTimeRange_query];
+    int[] warmupAssocTimeRangeLimits = new int[assocTimeRange_warmup];
+    int[] assocTimeRangeLimits = new int[assocTimeRange_query];
 
     public static void main(String[] args) throws Exception {
         benchClassName = args[0];
@@ -236,10 +256,6 @@ public abstract class Benchmark<T> {
         printMemoryFootprint();
     }
 
-    public static <T> T modGet(List<T> xs, int i) {
-        return xs.get(i % xs.size());
-    }
-
     public static <T> void print(Iterable<T> xs, PrintWriter out) {
         if (out == null) return;
         for (T x : xs) {
@@ -269,32 +285,26 @@ public abstract class Benchmark<T> {
                 (allocated - rt.freeMemory()) * 1. / (1L << 30));
     }
 
-    static void getLong(String file, List<Long> neighbors) {
+    static void getLong(String file, long[] neighbors) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            List<String> lines = new ArrayList<>();
-            String line = br.readLine();
-            while (line != null) {
-                lines.add(line);
-                line = br.readLine();
-            }
-            for (int i = 0; i < lines.size(); i++) {
-                neighbors.add(Long.parseLong(lines.get(i)));
+            for (int i = 0; i < neighbors.length; i++) {
+                String line = br.readLine();
+                neighbors[i] = Long.parseLong(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    static void getLongInteger(String file, List<Long> nodeIds, List<Integer> atypes) {
+    static void getLongInteger(String file, long[] nodeIds, int[] atypes) {
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
-            String line = br.readLine();
-            while (line != null) {
+            for (int i = 0; i < nodeIds.length; i++) {
+                String line = br.readLine();
                 String[] toks = line.split(",");
-                nodeIds.add(Long.valueOf(toks[0]));
-                atypes.add(Integer.valueOf(toks[1]));
-                line = br.readLine();
+                nodeIds[i] = Long.valueOf(toks[0]);
+                atypes[i] = Integer.valueOf(toks[1]);
             }
         } catch (IOException e) {
             e.printStackTrace();
