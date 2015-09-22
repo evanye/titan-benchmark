@@ -11,18 +11,18 @@ query_dir=${sbin}/../../twitter2010-40attr16each-queries-with-supernodes
 results=~/results
 
 OUTPUT_DIR=output
-warmup=60
-measure=120
-cooldown=45
+warmup=$((3*60))
+measure=$((15*60))
+cooldown=$((3*60))
 
-numClients=(16 32 64)
+numClients=(16 64)
 tests=(
   # Primitive queries
-  Neighbor
-  NeighborNode
-  EdgeAttr
-  NeighborAtype
-  NodeNode
+  # Neighbor
+  # NeighborNode
+  # EdgeAttr
+  # NeighborAtype
+  # NodeNode
   MixPrimitive
   # TAO queries
   # AssocRange
@@ -42,13 +42,12 @@ wait
 echo "Synced benchmark repo and queries to all servers."
 
 bash ${sbin}/hosts.sh \
-  mkdir -p ${OUTPUT_DIR}
-bash ${sbin}/hosts.sh \
-  mvn -f titan-benchmark/pom.xml compile
+  source ${sbin}/prepare.sh ${OUTPUT_DIR}
 
 function restart_all() {
   bash ${sbin}/hosts.sh \
     bash ${sbin}/restart_cassandra.sh
+  sleep 60
 }
 
 function timestamp() {
@@ -58,7 +57,6 @@ function timestamp() {
 for clients in ${numClients[*]}; do
     for test in "${tests[@]}"; do
       restart_all
-      sleep 10
       bash ${sbin}/hosts.sh \
         mvn -f titan-benchmark/pom.xml exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
           -Dexec.args="${test} throughput ${dataset} ${query_dir} ${OUTPUT_DIR} ${clients} ${warmup} ${measure} ${cooldown}"

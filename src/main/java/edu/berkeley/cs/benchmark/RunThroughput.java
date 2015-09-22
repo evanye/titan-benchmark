@@ -16,7 +16,7 @@ public abstract class RunThroughput implements Runnable {
 
     public RunThroughput(int clientId) {
         this.clientId = clientId;
-        rand = new Random(SEED + clientId);
+        rand = new Random();
         g = new Graph();
     }
 
