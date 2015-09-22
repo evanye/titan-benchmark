@@ -4,6 +4,8 @@ import edu.berkeley.cs.titan.Assoc;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -14,8 +16,6 @@ public class MixTao extends Benchmark<Object> {
     final static double ASSOC_GET_PERC = 0.157;
     final static double ASSOC_COUNT_PERC = 0.117;
     final static double ASSOC_TIME_RANGE_PERC = 0.028;
-
-    final static int SEED = 1618;
 
     @Override
     public void readQueries() {
@@ -108,7 +108,8 @@ public class MixTao extends Benchmark<Object> {
                     graph.assocGet(
                             warmupAssocGetNodes[i],
                             warmupAssocGetAtypes[i],
-                            warmupAssocGetDstIdSets[i],
+//                            warmupAssocGetDstIdSets[i],
+                            new HashSet(Arrays.asList(warmupAssocGetDstIdSets[i])),
                             warmupAssocGetTimeLows[i],
                             warmupAssocGetTimeHighs[i]).size();
                 case 3:
@@ -164,7 +165,8 @@ public class MixTao extends Benchmark<Object> {
                     assocs = graph.assocGet(
                             assocGetNodes[i],
                             assocGetAtypes[i],
-                            assocGetDstIdSets[i],
+                            new HashSet(Arrays.asList(assocGetDstIdSets[i])),
+//                            assocGetDstIdSets[i],
                             assocGetTimeLows[i],
                             assocGetTimeHighs[i]);
                     end = System.nanoTime();
@@ -230,7 +232,8 @@ public class MixTao extends Benchmark<Object> {
                         g.assocGet(
                                 warmupAssocGetNodes[i],
                                 warmupAssocGetAtypes[i],
-                                warmupAssocGetDstIdSets[i],
+//                                warmupAssocGetDstIdSets[i],
+                                new HashSet(Arrays.asList(warmupAssocGetDstIdSets[i])),
                                 warmupAssocGetTimeLows[i],
                                 warmupAssocGetTimeHighs[i]).size();
                     case 3:
@@ -273,7 +276,8 @@ public class MixTao extends Benchmark<Object> {
                         return g.assocGet(
                                 assocGetNodes[i],
                                 assocGetAtypes[i],
-                                assocGetDstIdSets[i],
+//                                assocGetDstIdSets[i],
+                                new HashSet(Arrays.asList(assocGetDstIdSets[i])),
                                 assocGetTimeLows[i],
                                 assocGetTimeHighs[i]).size();
                     case 3:

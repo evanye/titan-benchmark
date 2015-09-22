@@ -1,13 +1,13 @@
 package edu.berkeley.cs.benchmark;
 
+import com.google.common.primitives.Longs;
 import edu.berkeley.cs.titan.Assoc;
 import edu.berkeley.cs.titan.Graph;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class AssocGet extends Benchmark<List<Assoc>> {
     public static final String WARMUP_FILE = "assocGet_warmup.txt";
@@ -30,7 +30,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
         return g.assocGet(
                 warmupAssocGetNodes[i],
                 warmupAssocGetAtypes[i],
-                warmupAssocGetDstIdSets[i],
+                new HashSet(Arrays.asList(warmupAssocGetDstIdSets[i])),
                 warmupAssocGetTimeLows[i],
                 warmupAssocGetTimeHighs[i]);
     }
@@ -40,14 +40,14 @@ public class AssocGet extends Benchmark<List<Assoc>> {
         return g.assocGet(
                 assocGetNodes[i],
                 assocGetAtypes[i],
-                assocGetDstIdSets[i],
+                new HashSet(Arrays.asList(assocGetDstIdSets[i])),
                 assocGetTimeLows[i],
                 assocGetTimeHighs[i]);
     }
 
     static void readAssocGetQueries(
             String file, long[] nodes, int[] atypes,
-            HashSet[] dstIdSets, long[] tLows, long[] tHighs) {
+            long[][] dstIdSets, long[] tLows, long[] tHighs) {
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(queryPath + "/" + file));
@@ -66,13 +66,13 @@ public class AssocGet extends Benchmark<List<Assoc>> {
 
                 if (idx4 == -1) {
                     tHighs[i] = Long.parseLong(line.substring(idx3 + 1));
-                    dstIdSets[i] = new HashSet();
+                    dstIdSets[i] = new long[0];
                     continue;
                 }
                 tHighs[i] = (Long.parseLong(line.substring(idx3 + 1, idx4)));
 
                 int idxLast = idx4, idxCurr;
-                HashSet dstIdSet = new HashSet();
+                List<Long> dstIdSet = new ArrayList<>();
                 while (true) {
                     idxCurr = line.indexOf(',', idxLast + 1);
                     if (idxCurr == -1) {
@@ -83,7 +83,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
                     idxLast = idxCurr;
                 }
                 dstIdSet.add(Long.parseLong(line.substring(idxLast + 1)));
-                dstIdSets[i] = dstIdSet;
+                dstIdSets[i] = Longs.toArray(dstIdSet);
             }
         } catch (IOException e) {
             e.printStackTrace();
