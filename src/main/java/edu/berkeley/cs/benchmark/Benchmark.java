@@ -18,8 +18,10 @@ public abstract class Benchmark<T> {
 
     public static final int assocCount_query = 12000000;
     public static final int assocCount_warmup = 2000000;
-    public static final int assocGet_query = 12000000;
-    public static final int assocGet_warmup = 2000000;
+    //public static final int assocGet_query = 12000000;
+    //public static final int assocGet_warmup = 2000000;
+    public static final int assocGet_query = 2000000;
+    public static final int assocGet_warmup = 300000;
     public static final int assocRange_query = 12000000;
     public static final int assocRange_warmup = 2000000;
     public static final int assocTimeRange_query = 12000000;

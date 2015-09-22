@@ -18,11 +18,11 @@ cooldown=$((3*60))
 numClients=(16 64)
 tests=(
   # Primitive queries
-  # Neighbor
-  # NeighborNode
-  # EdgeAttr
-  # NeighborAtype
-  # NodeNode
+  Neighbor
+  NeighborNode
+  EdgeAttr
+  NeighborAtype
+  NodeNode
   MixPrimitive
   # TAO queries
   # AssocRange
@@ -32,7 +32,6 @@ tests=(
   # AssocTimeRange
   MixTao
 )
-
 #### Copy the repo files over
 for host in `echo "$HOSTLIST"|sed  "s/#.*$//;/^$/d"`; do
   rsync -arL ${sbin}/../ ${host}:titan-benchmark &
@@ -42,7 +41,7 @@ wait
 echo "Synced benchmark repo and queries to all servers."
 
 bash ${sbin}/hosts.sh \
-  source ${sbin}/prepare.sh ${OUTPUT_DIR}
+  source ${sbin}/prepare.sh ${OUTPUT_DIR} ${query_dir}
 
 function restart_all() {
   bash ${sbin}/hosts.sh \
