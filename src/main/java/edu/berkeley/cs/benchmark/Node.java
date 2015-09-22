@@ -57,7 +57,6 @@ public class Node extends Benchmark<Set<Long>> {
                 queries1[i] = tokens[1];
                 indices2[i] = Integer.parseInt(tokens[2]);
                 queries2[i] = tokens[3];
-                line = br.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
