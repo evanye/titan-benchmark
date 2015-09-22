@@ -68,6 +68,7 @@ public class AssocGet extends Benchmark<List<Assoc>> {
                 if (idx4 == -1) {
                     tHighs[i] = (Long.parseLong(line.substring(idx3 + 1)));
                     dstIdSets.add(new HashSet<Long>());
+                    continue;
                 }
                 tHighs[i] = (Long.parseLong(line.substring(idx3 + 1, idx4)));
 
