@@ -16,8 +16,8 @@ public abstract class Benchmark<T> {
     public static long MEASURE_TIME = (long) (120 * 1e9);
     public static long COOLDOWN_TIME = (long) (30 * 1e9);
 
-    public static final int assocCount_query = 12000000;
-    public static final int assocCount_warmup = 2000000;
+    public static final int assocCount_query = 11999774;
+    public static final int assocCount_warmup = 1999959;
     //public static final int assocGet_query = 12000000;
     //public static final int assocGet_warmup = 2000000;
     public static final int assocGet_query = 2000000;
@@ -28,14 +28,14 @@ public abstract class Benchmark<T> {
     public static final int assocTimeRange_warmup = 2000000;
     public static final int objGet_query = 12000000;
     public static final int objGet_warmup = 2000000;
-    public static final int neighborAtype_query = 12000000;
-    public static final int neighborAtype_warmup = 2000000;
+    public static final int neighborAtype_query = 11999801;
+    public static final int neighborAtype_warmup = 1999960;
     public static final int edgeAttr_warmup = neighborAtype_warmup;
     public static final int edgeAttr_query = neighborAtype_warmup;
     public static final int neighborNode_query = 6000000;
     public static final int neighborNode_warmup = 1000000;
-    public static final int neighbor_query = 6000000;
-    public static final int neighbor_warmup = 1000000;
+    public static final int neighbor_query = 5999899;
+    public static final int neighbor_warmup = 999983;
     public static final int node_query = 6000000;
     public static final int node_warmup = 1000000;
 
