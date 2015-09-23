@@ -16,24 +16,24 @@ OUTPUT_DIR=output
 
 warmup=$((5*60))
 measure=$((15*60))
-cooldown=$((3*60))
+cooldown=$((10*60))
 
-numClients=(16 32 64)
+numClients=(16)
 tests=(
   # Primitive queries
-  Neighbor
+  # Neighbor
   # NeighborNode
   # EdgeAttr
   # NeighborAtype
   # NodeNode
-  MixPrimitive
+  # MixPrimitive
   # TAO queries
   # AssocRange
   # ObjGet
   # AssocGet
   # AssocCount
   # AssocTimeRange
-  # MixTao
+  MixTao
 )
 
 #### Copy the repo files over
@@ -60,9 +60,12 @@ function timestamp() {
 for clients in ${numClients[*]}; do
     for test in "${tests[@]}"; do
       restart_all
+
+      launcherStart=$(date +"%s")
       bash ${sbin}/hosts.sh \
         mvn -f titan-benchmark/pom.xml exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
           -Dexec.args="${test} throughput ${dataset} ${query_dir} ${OUTPUT_DIR} ${clients} ${warmup} ${measure} ${cooldown}"
+      launcherEnd=$(date +"%s")
 
       bash ${sbin}/hosts.sh \
         tail -n1 ${OUTPUT_DIR}/${test}_throughput.csv | cut -d'	' -f2 >> ${results}/thput
@@ -73,6 +76,7 @@ for clients in ${numClients[*]}; do
       t=$(timestamp)
       touch ${f}
       echo "$t,$test" >> ${f}
+      echo "Measured from master: $((launcherEnd - launcherStart)) secs" >> ${f}
       cat ${results}/thput >> ${f}
 
       entry="${t}, ${test}, ${clients}, ${sum}"
