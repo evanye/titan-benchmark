@@ -24,7 +24,7 @@ public class NodeNode extends Node {
             @Override
             public void warmupQuery() {
                 int idx = rand.nextInt(node_warmup);
-                NodeNode.this.warmupQuery(g, rand.nextInt(idx));
+                NodeNode.this.warmupQuery(g, idx);
             }
 
             @Override
