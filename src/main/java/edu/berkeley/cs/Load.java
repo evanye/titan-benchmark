@@ -100,7 +100,6 @@ public class Load {
             }
         }
 
-        bg.commit();
 
         c = 1L;
         try (BufferedReader br = new BufferedReader(new FileReader(edgeFile))) {
