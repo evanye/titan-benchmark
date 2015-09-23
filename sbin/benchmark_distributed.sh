@@ -8,10 +8,13 @@ sbin=/home/ubuntu/titan-benchmark/sbin
 host_file=nsdi-10cass.hosts
 query_name=twitter2010-40attr16each-queries-no-supernodes-perAtypeCap-10000
 
+HOSTLIST=`cat ${sbin}/../conf/${host_file}`
+query_dir=${sbin}/../../${query_name}
+
 results=~/results
 OUTPUT_DIR=output
 
-warmup=$((3*60))
+warmup=$((5*60))
 measure=$((15*60))
 cooldown=$((3*60))
 
@@ -32,9 +35,6 @@ tests=(
   # AssocTimeRange
   # MixTao
 )
-
-HOSTLIST=`cat ${sbin}/../conf/${host_file}`
-query_dir=${sbin}/../../${query_name}
 
 #### Copy the repo files over
 for host in `echo "$HOSTLIST"|sed  "s/#.*$//;/^$/d"`; do
