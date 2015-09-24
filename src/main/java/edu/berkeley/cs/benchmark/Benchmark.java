@@ -31,7 +31,7 @@ public abstract class Benchmark<T> {
     public static final int neighborAtype_query = 11999801;
     public static final int neighborAtype_warmup = 1999960;
     public static final int edgeAttr_warmup = neighborAtype_warmup;
-    public static final int edgeAttr_query = neighborAtype_warmup;
+    public static final int edgeAttr_query = neighborAtype_query;
     public static final int neighborNode_query = 6000000;
     public static final int neighborNode_warmup = 1000000;
     public static final int neighbor_query = 5999899;
