@@ -6,7 +6,7 @@ set -e
 dataset=twitter
 sbin=/home/ubuntu/titan-benchmark/sbin
 host_file=nsdi-10cass.hosts
-query_name=twitter2010-40attr16each-queries-no-supernodes-perAtypeCap-10000
+query_name=no_supernode_queries
 
 HOSTLIST=`cat ${sbin}/../conf/${host_file}`
 query_dir=${sbin}/../../${query_name}
@@ -26,7 +26,7 @@ tests=(
   # EdgeAttr
   # NeighborAtype
   # NodeNode
-  # MixPrimitive
+  MixPrimitive
   # TAO queries
   # AssocRange
   # ObjGet
@@ -44,6 +44,7 @@ done
 wait
 echo "Synced benchmark repo and queries to all servers."
 
+mkdir -p ${results}
 bash ${sbin}/hosts.sh \
   source ${sbin}/prepare.sh ${OUTPUT_DIR} ${query_dir}
 
