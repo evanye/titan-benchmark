@@ -2,6 +2,7 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
@@ -85,7 +86,12 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
         return new RunThroughput(clientId) {
             @Override
             public void warmupQuery() {
+                PrintWriter assocToDelete = makeFileWriter(
+                    "updates-warmup.csv", false);
+
                 int i, src, atype, dst;
+                int edgesRemoved = 0, edgesAdded = 0;
+
                 switch (chooseQuery(rand)) {
                     case 0:
                         // assoc_range
@@ -133,13 +139,28 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
                         g.assocAdd(src, atype, dst,
                             TaoUpdates.MAX_TIME, TaoUpdates.ATTR_FOR_NEW_EDGES);
 
+                        ++edgesAdded;
+                        assocToDelete.println(src + "," + atype + "," + dst);
+
                         g.restartTransaction();
                 }
+
+                assocToDelete.close();
+                Benchmark.printMemoryFootprint();
+
+                System.out.println("Removing added edges");
+                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + "updates-warmup.csv");
+                System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
             }
 
             @Override
             public int query() {
                 int i, src, atype, dst;
+                PrintWriter assocToDelete = makeFileWriter(
+                    "updates-query.csv", false);
+
+                int edgesRemoved = 0, edgesAdded = 0;
+
                 switch (chooseQuery(rand)) {
                     case 0:
                         // assoc_range
@@ -187,9 +208,17 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
 
                         g.assocAdd(src, atype, dst,
                             TaoUpdates.MAX_TIME, TaoUpdates.ATTR_FOR_NEW_EDGES);
+                        ++edgesAdded;
 
                         g.restartTransaction();
                 }
+
+                assocToDelete.close();
+                Benchmark.printMemoryFootprint();
+
+                System.out.println("Removing added edges");
+                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + "updates-query.csv");
+                System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
                 return 0;
             }
         };

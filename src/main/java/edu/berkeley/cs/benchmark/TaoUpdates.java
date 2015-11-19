@@ -26,6 +26,27 @@ public class TaoUpdates extends Benchmark<Object> {
     final static int SEED = 1618;
     final static Random rand = new Random(SEED);
 
+    public static int removeEdges(Graph graph, String path) {
+        int src, atype, dst, edgesRemoved = 0;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(path));
+            String line = br.readLine();
+            while (line != null) {
+                String[] toks = line.split(",");
+                src = Integer.parseInt(toks[0]);
+                atype = Integer.parseInt(toks[1]);
+                dst = Integer.parseInt(toks[2]);
+
+                boolean res = graph.assocDelete(src, atype, dst);
+                if (res) edgesRemoved++;
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return edgesRemoved;
+    }
+
     @Override
     public void readQueries() {
     }
@@ -80,22 +101,7 @@ public class TaoUpdates extends Benchmark<Object> {
         Benchmark.printMemoryFootprint();
 
         System.out.println("Removing added edges");
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(outputPath + "/" + "updates.csv"));
-            String line = br.readLine();
-            while (line != null) {
-                String[] toks = line.split(",");
-                src = Integer.parseInt(toks[0]);
-                atype = Integer.parseInt(toks[1]);
-                dst = Integer.parseInt(toks[2]);
-
-                boolean res = graph.assocDelete(src, atype, dst);
-                if (res) edgesRemoved++;
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        edgesRemoved = removeEdges(graph, outputPath + "/" + "updates.csv");
         System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
     }
 
