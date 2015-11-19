@@ -63,15 +63,17 @@ public class Graph {
         return 0;
     }
 
-    public void assocDelete(long src, int atype, long dst) {
+    public boolean assocDelete(long src, int atype, long dst) {
         TitanVertex node = getNode(src);
         for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
             if (getId(edge.getOtherVertex(node)) == dst &&
                     (long) edge.getProperty("timestamp") == TaoUpdates.MAX_TIME &&
                     edge.getProperty("property").equals(TaoUpdates.ATTR_FOR_NEW_EDGES)) {
                 edge.remove();
+                return true;
             }
         }
+        return false;
     }
 
     public List<Long> getNeighbors(long id) {

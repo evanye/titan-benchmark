@@ -10,9 +10,6 @@ import java.util.Random;
 
 public class TaoUpdates extends Benchmark<Object> {
 
-    // FIXME: hard-coded
-    final static int MAX_NUM_NEW_EDGES = 200000;
-
     // Twitter
     final static int NUM_NODES = 41652230;
     final static int NUM_ATYPES = 5;
@@ -40,15 +37,14 @@ public class TaoUpdates extends Benchmark<Object> {
         PrintWriter assocToDelete = makeFileWriter("updates.csv", false);
         Random rand = new Random(SEED);
 
-        WARMUP_N = MAX_NUM_NEW_EDGES / 10;
-        MEASURE_N = MAX_NUM_NEW_EDGES - WARMUP_N;
-
         System.out.println("Titan tao update query latency");
         System.out.println("Warming up for " + WARMUP_N + " queries");
         int ret;
         long start, end;
 
         int src, atype, dst;
+
+        int edgesAdded = 0, edgesRemoved = 0;
 
         for (int i = 0; i < WARMUP_N; i++) {
             graph.restartTransaction();
@@ -59,6 +55,7 @@ public class TaoUpdates extends Benchmark<Object> {
 
             assocToDelete.println(src + "," + atype + "," + dst);
             graph.assocAdd(src, atype, dst, MAX_TIME, ATTR_FOR_NEW_EDGES);
+            edgesAdded++;
         }
 
         System.out.println("Measuring for " + MEASURE_N + " queries");
@@ -75,6 +72,7 @@ public class TaoUpdates extends Benchmark<Object> {
 
             assocToDelete.println(src + "," + atype + "," + dst);
             assocAddOut.println(ret + "," + (end - start) * 1. / 1e3);
+            edgesAdded++;
         }
 
         assocAddOut.close();
@@ -91,12 +89,14 @@ public class TaoUpdates extends Benchmark<Object> {
                 atype = Integer.parseInt(toks[1]);
                 dst = Integer.parseInt(toks[2]);
 
-                graph.assocDelete(src, atype, dst);
+                boolean res = graph.assocDelete(src, atype, dst);
+                if (res) edgesRemoved++;
                 line = br.readLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
     }
 
     /**
