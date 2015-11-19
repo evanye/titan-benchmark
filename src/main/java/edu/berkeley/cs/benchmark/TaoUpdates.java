@@ -2,6 +2,9 @@ package edu.berkeley.cs.benchmark;
 
 import edu.berkeley.cs.titan.Graph;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
 
@@ -13,8 +16,8 @@ public class TaoUpdates extends Benchmark<Object> {
     // Twitter
     final static int NUM_NODES = 41652230;
     final static int NUM_ATYPES = 5;
-    final static long MAX_TIME = 1441905687237L;
-    static String ATTR_FOR_NEW_EDGES;
+    public final static long MAX_TIME = 1441905687237L;
+    public static String ATTR_FOR_NEW_EDGES;
     {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 128; ++i) {
@@ -34,6 +37,7 @@ public class TaoUpdates extends Benchmark<Object> {
     public void benchLatency() {
         Graph graph = new Graph();
         PrintWriter assocAddOut = makeFileWriter("taoUpdates.csv", false);
+        PrintWriter assocToDelete = makeFileWriter("updates.csv", false);
         Random rand = new Random(SEED);
 
         WARMUP_N = MAX_NUM_NEW_EDGES / 10;
@@ -53,6 +57,7 @@ public class TaoUpdates extends Benchmark<Object> {
             atype = rand.nextInt(NUM_ATYPES);
             dst = rand.nextInt(NUM_NODES);
 
+            assocToDelete.println(src + "," + atype + "," + dst);
             graph.assocAdd(src, atype, dst, MAX_TIME, ATTR_FOR_NEW_EDGES);
         }
 
@@ -68,11 +73,30 @@ public class TaoUpdates extends Benchmark<Object> {
             ret = graph.assocAdd(src, atype, dst, MAX_TIME, ATTR_FOR_NEW_EDGES);
             end = System.nanoTime();
 
+            assocToDelete.println(src + "," + atype + "," + dst);
             assocAddOut.println(ret + "," + (end - start) * 1. / 1e3);
         }
 
         assocAddOut.close();
+        assocToDelete.close();
         Benchmark.printMemoryFootprint();
+
+        System.out.println("Removing added edges");
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(outputPath + "/" + "updates.csv"));
+            String line = br.readLine();
+            while (line != null) {
+                String[] toks = line.split(",");
+                src = Integer.parseInt(toks[0]);
+                atype = Integer.parseInt(toks[1]);
+                dst = Integer.parseInt(toks[2]);
+
+                graph.assocDelete(src, atype, dst);
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

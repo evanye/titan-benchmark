@@ -5,6 +5,7 @@ import com.thinkaurelius.titan.core.util.TitanId;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
+import edu.berkeley.cs.benchmark.TaoUpdates;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -60,6 +61,17 @@ public class Graph {
         edge.setProperty("timestamp", time);
         edge.setProperty("property", attr);
         return 0;
+    }
+
+    public void assocDelete(long src, int atype, long dst) {
+        TitanVertex node = getNode(src);
+        for (TitanEdge edge: node.getTitanEdges(Direction.OUT, intToAtype[atype])) {
+            if (getId(edge.getOtherVertex(node)) == dst &&
+                    (long) edge.getProperty("timestamp") == TaoUpdates.MAX_TIME &&
+                    edge.getProperty("property").equals(TaoUpdates.ATTR_FOR_NEW_EDGES)) {
+                edge.remove();
+            }
+        }
     }
 
     public List<Long> getNeighbors(long id) {
