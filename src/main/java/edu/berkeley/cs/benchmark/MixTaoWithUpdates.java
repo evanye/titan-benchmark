@@ -11,6 +11,14 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
     // Read workload distribution; from ATC 13 Bronson et al.
     final static double UPDATE_RATE = 0.002;
 
+    static String ATTR;
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 128; ++i) {
+            sb.append('|');
+        }
+        ATTR= sb.toString();
+    }
     final static double ASSOC_RANGE_PERC = 0.409;
     final static double OBJ_GET_PERC = 0.289;
     final static double ASSOC_GET_PERC = 0.157;
@@ -87,7 +95,7 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
             @Override
             public void warmupQuery() {
                 PrintWriter assocToDelete = makeFileWriter(
-                    "updates-warmup.csv", false);
+                    clientId + "_updates-warmup.csv", false);
 
                 int i, src, atype, dst;
                 int edgesRemoved = 0, edgesAdded = 0;
@@ -137,7 +145,7 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
                         dst = rand.nextInt(TaoUpdates.NUM_NODES);
 
                         g.assocAdd(src, atype, dst,
-                            TaoUpdates.MAX_TIME, TaoUpdates.ATTR_FOR_NEW_EDGES);
+                            TaoUpdates.MAX_TIME, ATTR);
 
                         ++edgesAdded;
                         assocToDelete.println(src + "," + atype + "," + dst);
@@ -146,10 +154,9 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
                 }
 
                 assocToDelete.close();
-                Benchmark.printMemoryFootprint();
 
                 System.out.println("Removing added edges");
-                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + "updates-warmup.csv");
+                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + clientId +  "_updates-warmup.csv");
                 System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
             }
 
@@ -157,7 +164,7 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
             public int query() {
                 int i, src, atype, dst;
                 PrintWriter assocToDelete = makeFileWriter(
-                    "updates-query.csv", false);
+                    clientId + "_updates-query.csv", false);
 
                 int edgesRemoved = 0, edgesAdded = 0;
 
@@ -207,17 +214,16 @@ public class MixTaoWithUpdates extends Benchmark<Object> {
                         dst = rand.nextInt(TaoUpdates.NUM_NODES);
 
                         g.assocAdd(src, atype, dst,
-                            TaoUpdates.MAX_TIME, TaoUpdates.ATTR_FOR_NEW_EDGES);
+                            TaoUpdates.MAX_TIME, ATTR);
                         ++edgesAdded;
 
                         g.restartTransaction();
                 }
 
                 assocToDelete.close();
-                Benchmark.printMemoryFootprint();
 
-                System.out.println("Removing added edges");
-                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + "updates-query.csv");
+                // System.out.println("Removing added edges");
+                edgesRemoved = TaoUpdates.removeEdges(g, outputPath + "/" + clientId + "_updates-query.csv");
                 System.out.println("Added :" + edgesAdded + " edges and removed: " + edgesRemoved + " edges");
                 return 0;
             }
