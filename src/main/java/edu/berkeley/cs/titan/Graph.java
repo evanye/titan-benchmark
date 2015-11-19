@@ -54,6 +54,14 @@ public class Graph {
         txn = g.buildTransaction().start();
     }
 
+    public int assocAdd(long src, int atype, long dst, long time, String attr) {
+        TitanEdge edge = txn.addEdge(
+            getNode(src), getNode(dst), intToAtype[atype]);
+        edge.setProperty("timestamp", time);
+        edge.setProperty("property", attr);
+        return 0;
+    }
+
     public List<Long> getNeighbors(long id) {
         List<Long> neighbors = new ArrayList<>();
         TitanVertex node = getNode(id);
