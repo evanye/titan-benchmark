@@ -5,27 +5,28 @@ dataset=twitter
 latency=true
 throughput=false
 QUERY_DIR=/mnt/mnt/twitter2010-40attr16each-queries
-OUTPUT_DIR=/mnt/mnt/output
+OUTPUT_DIR=~/output
 mkdir -p $OUTPUT_DIR
 
 # List of all possible queries you can benchmark against
 # Comment any out if you don't want to benchmark them
 tests=(
+  TaoUpdates
   # Primitive queries
-  Neighbor
-  NeighborNode
-  EdgeAttr
-  NeighborAtype
+  # Neighbor
+  # NeighborNode
+  # EdgeAttr
+  # NeighborAtype
   # Node
-  NodeNode
-  MixPrimitive
+  # NodeNode
+  # MixPrimitive
   # TAO queries
-  AssocRange
-  ObjGet
-  AssocGet
-  AssocCount
-  AssocTimeRange
-  MixTao
+  # AssocRange
+  # ObjGet
+  # AssocGet
+  # AssocCount
+  # AssocTimeRange
+  # MixTao
 )
 
 #JVM_HEAP=6900
@@ -41,15 +42,16 @@ numClients=( 1 8 64 128 )
 
 if [ "$latency" = true ]; then
   for test in "${tests[@]}"; do
-    sudo sh -c 'service cassandra stop'
-    sleep 5
-    sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
-    sudo sh -c 'service cassandra start'
-    sleep 15
-    nodetool invalidaterowcache
-    nodetool invalidatekeycache
-    nodetool invalidatecountercache
-    sleep 2
+    #sudo sh -c 'service cassandra stop'
+    #sleep 5
+    #sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
+    #sudo sh -c 'service cassandra start'
+    #sleep 15
+    #nodetool enablethrift
+    #nodetool invalidaterowcache
+    #nodetool invalidatekeycache
+    #nodetool invalidatecountercache
+    #sleep 20
     mvn exec:java -Dexec.mainClass="edu.berkeley.cs.benchmark.Benchmark" \
       -Dexec.args="${test} latency ${dataset} ${QUERY_DIR} ${OUTPUT_DIR} ${warmup} ${measure}"
   done
